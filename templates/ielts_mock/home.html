@@ -1,0 +1,541 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}IELTS Mock Test - BandBooster{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <style>
+        /* IELTS Mock Test specific styles */
+        .mock-test-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .mock-test-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .mock-test-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--dark-color);
+        }
+
+        .mock-test-header p {
+            color: var(--gray-color);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .test-type-section {
+            margin-bottom: 3rem;
+        }
+
+        .test-type-section h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .test-type-section p {
+            color: var(--gray-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .test-types {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .test-type-card {
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background-color: #f8fafc;
+        }
+
+        .test-type-card:hover, .test-type-card.selected {
+            border-color: var(--primary-color);
+            background-color: rgba(37, 99, 235, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .test-type-card.selected {
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.15);
+        }
+
+        .test-type-card h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--dark-color);
+        }
+
+        .test-type-card p {
+            font-size: 0.9rem;
+            color: var(--gray-color);
+        }
+
+        .info-box {
+            background-color: rgba(37, 99, 235, 0.05);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .info-icon {
+            color: var(--primary-color);
+            flex-shrink: 0;
+        }
+
+        .info-content h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--dark-color);
+        }
+
+        .info-content p {
+            font-size: 0.9rem;
+            color: var(--gray-color);
+        }
+
+        .start-test-btn {
+            display: inline-block;
+            background-color: var(--dark-color);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .start-test-btn:hover {
+            background-color: #0f172a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.15);
+        }
+
+        .test-format-section {
+            margin-top: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .test-format-section h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .test-format-section p {
+            color: var(--gray-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .test-sections {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .test-section-card {
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .test-section-card:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+        }
+
+        .section-icon {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+        }
+
+        .test-section-card h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--dark-color);
+        }
+
+        .test-section-card p {
+            font-size: 0.8rem;
+            color: var(--gray-color);
+            margin-bottom: 0.25rem;
+        }
+
+        .practice-skills {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+        }
+
+        .practice-skills p {
+            color: var(--gray-color);
+            margin: 0;
+        }
+
+        .practice-skills-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary-color);
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .practice-skills-btn:hover {
+            transform: translateX(5px);
+        }
+
+        .previous-tests {
+            margin-top: 3rem;
+        }
+
+        .previous-tests h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .test-history-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .test-history-table th,
+        .test-history-table td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .test-history-table th {
+            font-weight: 600;
+            color: var(--dark-color);
+            background-color: #f8fafc;
+        }
+
+        .test-history-table tr:hover {
+            background-color: rgba(37, 99, 235, 0.05);
+        }
+
+        .test-history-table .score {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .test-history-table .status {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .test-history-table .status.completed {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+        }
+
+        .test-history-table .status.in-progress {
+            background-color: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+        }
+
+        .test-history-table .status.not-started {
+            background-color: rgba(107, 114, 128, 0.1);
+            color: #6b7280;
+        }
+
+        .coin-balance {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: rgba(37, 99, 235, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .coin-icon {
+            width: 20px;
+            height: 20px;
+            color: #f59e0b;
+        }
+
+        .cost-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--gray-color);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .test-types {
+                grid-template-columns: 1fr;
+            }
+
+            .test-sections {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .test-sections {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block header %}{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block content %}
+    <div class="dashboard-container">
+        <!-- Include the sidebar -->
+        {% include 'core/partials/sidebar.html' with active_page='ielts_mock' %}
+
+        <main class="dashboard-main">
+            <div class="mock-test-container">
+                <div class="mock-test-header">
+                    <h1>IELTS Mock Test</h1>
+                    <p>Take a full-length practice test that simulates the real IELTS exam. Our AI will generate personalized questions for all sections.</p>
+                </div>
+
+                <div class="coin-balance">
+                    <svg class="coin-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    {{ coins }} COINS
+                </div>
+
+                <div class="test-type-section">
+                    <h2>Choose Your Test Type</h2>
+                    <p>Select the IELTS test format that matches your goals</p>
+
+                    <form method="post" action="{% url 'start_test' %}">
+                        {% csrf_token %}
+                        <div class="test-types">
+                            <div class="test-type-card selected" id="academic-test">
+                                <h3>Academic</h3>
+                                <p>For higher education admission and professional registration in English-speaking environments.</p>
+                                <input type="radio" name="test_type" value="academic" checked style="display: none;">
+                            </div>
+
+                            <div class="test-type-card" id="general-test">
+                                <h3>General Training</h3>
+                                <p>For work experience, training programs, or migration to English-speaking countries.</p>
+                                <input type="radio" name="test_type" value="general" style="display: none;">
+                            </div>
+                        </div>
+
+                        <div class="info-box">
+                            <div class="info-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                                </svg>
+                            </div>
+                            <div class="info-content">
+                                <h3>About This Test</h3>
+                                <p>This is a full-length IELTS mock test that simulates the real exam. When you start, our AI will generate unique questions for all four sections. The test takes approximately 2 hours and 45 minutes to complete.</p>
+                                <div class="cost-info">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                                    </svg>
+                                    Taking a mock test costs 100 coins.
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="start-test-btn" id="start-test-btn">Start IELTS Academic Exam</button>
+                        <span style="margin-left: 1rem; color: var(--gray-color);">You'll receive detailed feedback and a band score estimate after completion.</span>
+                    </form>
+                </div>
+
+                <div class="test-format-section">
+                    <h2>Test Format</h2>
+                    <p>The IELTS exam consists of four sections</p>
+
+                    <div class="test-sections">
+                        <div class="test-section-card">
+                            <div class="section-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                                </svg>
+                            </div>
+                            <h3>Reading</h3>
+                            <p>60 minutes, 40 questions</p>
+                            <p>across 3 passages</p>
+                        </div>
+
+                        <div class="test-section-card">
+                            <div class="section-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                                    <line x1="12" y1="19" x2="12" y2="23"></line>
+                                    <line x1="8" y1="23" x2="16" y2="23"></line>
+                                </svg>
+                            </div>
+                            <h3>Listening</h3>
+                            <p>30 minutes, 40 questions</p>
+                            <p>across 4 sections</p>
+                        </div>
+
+                        <div class="test-section-card">
+                            <div class="section-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 20h9"></path>
+                                    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                                </svg>
+                            </div>
+                            <h3>Writing</h3>
+                            <p>60 minutes, 2 tasks</p>
+                            <p>(150 and 250 words)</p>
+                        </div>
+
+                        <div class="test-section-card">
+                            <div class="section-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                                    <line x1="12" y1="19" x2="12" y2="23"></line>
+                                    <line x1="8" y1="23" x2="16" y2="23"></line>
+                                </svg>
+                            </div>
+                            <h3>Speaking</h3>
+                            <p>11-14 minutes, 3 parts</p>
+                            <p>with an examiner</p>
+                        </div>
+                    </div>
+                </div>
+
+                {% if user_tests %}
+                    <div class="previous-tests">
+                        <h2>Your Previous Tests</h2>
+                        <table class="test-history-table">
+                            <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Score</th>
+                                <th>Action</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for test in user_tests %}
+                                <tr>
+                                    <td>{{ test.created_at|date:"M d, Y" }}</td>
+                                    <td>{{ test.get_test_type_display }}</td>
+                                    <td>
+                                        {% if test.status == 'completed' %}
+                                            <span class="status completed">Completed</span>
+                                        {% elif test.status == 'in_progress' %}
+                                            <span class="status in-progress">In Progress</span>
+                                        {% else %}
+                                            <span class="status not-started">Not Started</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="score">
+                                        {% if test.overall_score %}
+                                            {{ test.overall_score }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if test.status == 'completed' %}
+                                            <a href="{% url 'test_results' test_id=test.id %}" class="btn btn-sm btn-outline">View Results</a>
+                                        {% elif test.status == 'in_progress' %}
+                                            <a href="{% url 'reading_test' test_id=test.id %}" class="btn btn-sm btn-outline">Continue</a>
+                                        {% else %}
+                                            <a href="{% url 'reading_test' test_id=test.id %}" class="btn btn-sm btn-outline">Start</a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endif %}
+            </div>
+        </main>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Test type selection
+            const academicTest = document.getElementById('academic-test');
+            const generalTest = document.getElementById('general-test');
+            const startButton = document.getElementById('start-test-btn');
+            const academicRadio = document.querySelector('input[value="academic"]');
+            const generalRadio = document.querySelector('input[value="general"]');
+
+            academicTest.addEventListener('click', function() {
+                academicTest.classList.add('selected');
+                generalTest.classList.remove('selected');
+                academicRadio.checked = true;
+                startButton.textContent = 'Start IELTS Academic Exam';
+            });
+
+            generalTest.addEventListener('click', function() {
+                generalTest.classList.add('selected');
+                academicTest.classList.remove('selected');
+                generalRadio.checked = true;
+                startButton.textContent = 'Start IELTS General Training Exam';
+            });
+
+            // Display any messages
+            {% if messages %}
+                {% for message in messages %}
+                    alert("{{ message }}");
+                {% endfor %}
+            {% endif %}
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Login - BandBooster{% endblock %}
+
+{% block content %}
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-tabs">
+                <a href="{% url 'login' %}" class="auth-tab active">Login</a>
+                <a href="{% url 'register' %}" class="auth-tab">Register</a>
+            </div>
+
+            <div class="auth-form">
+                <h2>Welcome back</h2>
+                <p class="auth-subtitle">Enter your credentials to access your account</p>
+
+                {% if form.non_field_errors %}
+                    <div class="error-message">
+                        {% for error in form.non_field_errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <form method="post" action="{% url 'login' %}">
+                    {% csrf_token %}
+
+                    <div class="form-group">
+                        <label for="id_username">Email</label>
+                        {{ form.username }}
+                        {% if form.username.errors %}
+                            <div class="error-message">{{ form.username.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group password-group">
+                        <label for="id_password">Password</label>
+                        <a href="#" class="forgot-password">Forgot password?</a>
+                        {{ form.password }}
+                        {% if form.password.errors %}
+                            <div class="error-message">{{ form.password.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-check">
+                        {{ form.remember_me }}
+                        <label for="id_remember_me">Remember me for 30 days</label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block">Sign in</button>
+
+                    <!-- Add hidden next parameter if it exists in the URL -->
+                    {% if request.GET.next %}
+                        <input type="hidden" name="next" value="{{ request.GET.next }}">
+                    {% endif %}
+                </form>
+
+                <div class="auth-footer">
+                    <p>Don't have an account? <a href="{% url 'register' %}">Sign up</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

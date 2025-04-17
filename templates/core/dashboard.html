@@ -1,0 +1,777 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - BandBooster{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <style>
+        /* Modern dashboard styles */
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+            background-color: #f8fafc;
+        }
+
+        .dashboard-sidebar {
+            width: 280px;
+            background-color: white;
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            z-index: 10;
+        }
+
+        .dashboard-main {
+            flex: 1;
+            margin-left: 280px;
+            padding: 2rem;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--dark-color);
+            margin: 0;
+        }
+
+        .dashboard-header p {
+            color: var(--gray-color);
+            margin: 0.5rem 0 0 0;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .coin-balance {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: rgba(37, 99, 235, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .coin-icon {
+            width: 20px;
+            height: 20px;
+            color: #f59e0b;
+        }
+
+        /* Score overview section */
+        .overview-section {
+            background-color: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .overview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .overview-header h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .overview-header .target-score {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+        }
+
+        .target-score span {
+            color: var(--gray-color);
+        }
+
+        .target-score strong {
+            color: var(--primary-color);
+        }
+
+        .score-cards {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1.5rem;
+        }
+
+        .score-card {
+            background-color: #f8fafc;
+            border-radius: 8px;
+            padding: 1.25rem;
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .score-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .score-card h3 {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--gray-color);
+            margin: 0 0 0.75rem 0;
+        }
+
+        .score-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .score-change {
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+        }
+
+        .score-change.positive {
+            color: #10b981;
+        }
+
+        .score-change.negative {
+            color: #ef4444;
+        }
+
+        .score-change.neutral {
+            color: var(--gray-color);
+        }
+
+        /* Progress charts section */
+        .charts-section {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-card {
+            background-color: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .chart-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .chart-header h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin: 0 0 0.25rem 0;
+        }
+
+        .chart-header p {
+            font-size: 0.875rem;
+            color: var(--gray-color);
+            margin: 0;
+        }
+
+        .chart-container {
+            height: 300px;
+            position: relative;
+        }
+
+        /* Recent tests section */
+        .recent-tests-section {
+            background-color: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .recent-tests-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .recent-tests-header h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .view-all {
+            color: var(--primary-color);
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+
+        .tests-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .tests-table th {
+            text-align: left;
+            padding: 0.75rem 1rem;
+            font-weight: 500;
+            color: var(--gray-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tests-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tests-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .tests-table tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .test-date {
+            color: var(--gray-color);
+            font-size: 0.875rem;
+        }
+
+        .test-type {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .test-type.academic {
+            background-color: #e0f2fe;
+            color: #0369a1;
+        }
+
+        .test-type.general {
+            background-color: #f0fdf4;
+            color: #166534;
+        }
+
+        .test-status {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .test-status.completed {
+            background-color: #f0fdf4;
+            color: #166534;
+        }
+
+        .test-status.in_progress {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+
+        .test-status.not_started {
+            background-color: #f1f5f9;
+            color: #64748b;
+        }
+
+        .test-score {
+            font-weight: 600;
+        }
+
+        .test-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .test-action {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            background-color: #f1f5f9;
+            color: #64748b;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .test-action:hover {
+            background-color: #e2e8f0;
+        }
+
+        /* Improvement areas section */
+        .improvement-areas-section {
+            background-color: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .improvement-areas-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .improvement-areas-header h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 0 0 0.25rem 0;
+        }
+
+        .improvement-areas-header p {
+            font-size: 0.875rem;
+            color: var(--gray-color);
+            margin: 0;
+        }
+
+        .improvement-areas {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+
+        .improvement-area {
+            background-color: #f8fafc;
+            border-radius: 8px;
+            padding: 1.25rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .improvement-area:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .improvement-area h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0 0 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .improvement-area h3 svg {
+            color: #ef4444;
+        }
+
+        .improvement-area p {
+            font-size: 0.875rem;
+            color: var(--gray-color);
+            margin: 0 0 1rem 0;
+        }
+
+        .improvement-area .btn {
+            font-size: 0.875rem;
+            padding: 0.5rem 0.75rem;
+        }
+
+        /* Responsive design */
+        @media (max-width: 1200px) {
+            .score-cards {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+
+            .improvement-areas {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-sidebar {
+                display: none;
+            }
+
+            .dashboard-main {
+                margin-left: 0;
+                padding: 1rem;
+            }
+
+            .score-cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .improvement-areas {
+                grid-template-columns: 1fr;
+            }
+
+            .dashboard-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .header-actions {
+                margin-top: 1rem;
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .score-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="dashboard-container">
+        <!-- Include the sidebar -->
+        {% include 'core/partials/sidebar.html' with active_page='dashboard' %}
+
+        <main class="dashboard-main">
+            <header class="dashboard-header">
+                <div>
+                    <h1>Dashboard</h1>
+                    <p>Track your IELTS preparation progress and performance</p>
+                </div>
+                <div class="header-actions">
+                    <div class="coin-balance">
+                        <svg class="coin-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                        {{ user_data.coins }} COINS
+                    </div>
+                    <a href="{% url 'ielts_mock' %}" class="btn btn-primary">Take Mock Test</a>
+                    <button class="btn btn-outline">Practice Skills</button>
+                </div>
+            </header>
+
+            <!-- Score Overview Section -->
+            <section class="overview-section">
+                <div class="overview-header">
+                    <h2>Score Overview</h2>
+                    <div class="target-score">
+                        <span>Target Score:</span>
+                        <strong>{{ user_data.target_score }}</strong>
+                    </div>
+                </div>
+
+                <div class="score-cards">
+                    <div class="score-card">
+                        <h3>Overall</h3>
+                        <div class="score-value">{{ user_data.overall_score }}</div>
+                        <div class="score-change positive">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="18 15 12 9 6 15"></polyline>
+                            </svg>
+                            +0.5
+                        </div>
+                    </div>
+
+                    <div class="score-card">
+                        <h3>Reading</h3>
+                        <div class="score-value">{{ user_data.reading_score.score }}</div>
+                        <div class="score-change positive">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="18 15 12 9 6 15"></polyline>
+                            </svg>
+                            +{{ user_data.reading_score.change }}
+                        </div>
+                    </div>
+
+                    <div class="score-card">
+                        <h3>Listening</h3>
+                        <div class="score-value">{{ user_data.listening_score.score }}</div>
+                        <div class="score-change positive">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="18 15 12 9 6 15"></polyline>
+                            </svg>
+                            +{{ user_data.listening_score.change }}
+                        </div>
+                    </div>
+
+                    <div class="score-card">
+                        <h3>Writing</h3>
+                        <div class="score-value">{{ user_data.writing_score.score }}</div>
+                        <div class="score-change neutral">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            {{ user_data.writing_score.change }}
+                        </div>
+                    </div>
+
+                    <div class="score-card">
+                        <h3>Speaking</h3>
+                        <div class="score-value">{{ user_data.speaking_score.score }}</div>
+                        <div class="score-change positive">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="18 15 12 9 6 15"></polyline>
+                            </svg>
+                            +{{ user_data.speaking_score.change }}
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Progress Charts Section -->
+            <div class="charts-section">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>Progress Overview</h3>
+                        <p>Your performance across all sections</p>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="progressChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>Section Scores</h3>
+                        <p>Your performance by section</p>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="sectionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Tests Section -->
+            <section class="recent-tests-section">
+                <div class="recent-tests-header">
+                    <h2>Recent Tests</h2>
+                    <a href="#" class="view-all">View All Tests</a>
+                </div>
+
+                <table class="tests-table">
+                    <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                        <th>Overall</th>
+                        <th>R</th>
+                        <th>L</th>
+                        <th>W</th>
+                        <th>S</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for test in recent_tests %}
+                        <tr>
+                            <td class="test-date">{{ test.date }}</td>
+                            <td>
+                                <span class="test-type {{ test.type }}">{{ test.type }}</span>
+                            </td>
+                            <td>
+                                <span class="test-status {{ test.status }}">{{ test.status|title }}</span>
+                            </td>
+                            <td class="test-score">{{ test.overall_score }}</td>
+                            <td>{{ test.reading_score }}</td>
+                            <td>{{ test.listening_score }}</td>
+                            <td>{{ test.writing_score }}</td>
+                            <td>{{ test.speaking_score }}</td>
+                            <td>
+                                <div class="test-actions">
+                                    {% if test.status == 'completed' %}
+                                        <a href="{% url 'test_results' test_id=test.id %}" class="test-action">View Results</a>
+                                    {% elif test.status == 'in_progress' %}
+                                        <a href="{% url 'ielts_mock' %}" class="test-action">Continue</a>
+                                    {% else %}
+                                        <a href="{% url 'ielts_mock' %}" class="test-action">Start</a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="9" style="text-align: center; padding: 2rem;">
+                                <p>You haven't taken any tests yet.</p>
+                                <a href="{% url 'ielts_mock' %}" class="btn btn-primary" style="margin-top: 1rem;">Take Your First Test</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Improvement Areas Section -->
+            {% if user_data.improvement_areas %}
+                <section class="improvement-areas-section">
+                    <div class="improvement-areas-header">
+                        <h2>Areas for Improvement</h2>
+                        <p>Based on your recent test performance</p>
+                    </div>
+
+                    <div class="improvement-areas">
+                        {% for area in user_data.improvement_areas %}
+                            <div class="improvement-area">
+                                <h3>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                    </svg>
+                                    {{ area.section }} ({{ area.score }})
+                                </h3>
+                                <p>{{ area.message }}</p>
+                                <a href="#" class="btn btn-sm btn-outline">Practice {{ area.section }}</a>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </section>
+            {% endif %}
+        </main>
+    </div>
+
+    {% block extra_js %}
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Progress Chart
+                const progressCtx = document.getElementById('progressChart').getContext('2d');
+                const progressChart = new Chart(progressCtx, {
+                    type: 'line',
+                    data: {
+                        labels: {{ progress_data.months|safe }},
+                        datasets: [
+                            {
+                                label: 'Overall',
+                                data: {{ progress_data.overall|safe }},
+                                borderColor: '#2563eb',
+                                backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                                tension: 0.4,
+                                borderWidth: 2,
+                                pointBackgroundColor: '#2563eb',
+                                fill: true
+                            },
+                            {
+                                label: 'Reading',
+                                data: {{ progress_data.reading|safe }},
+                                borderColor: '#ef4444',
+                                backgroundColor: 'rgba(239, 68, 68, 0.0)',
+                                tension: 0.4,
+                                borderWidth: 2,
+                                pointBackgroundColor: '#ef4444'
+                            },
+                            {
+                                label: 'Listening',
+                                data: {{ progress_data.listening|safe }},
+                                borderColor: '#f59e0b',
+                                backgroundColor: 'rgba(245, 158, 11, 0.0)',
+                                tension: 0.4,
+                                borderWidth: 2,
+                                pointBackgroundColor: '#f59e0b'
+                            },
+                            {
+                                label: 'Writing',
+                                data: {{ progress_data.writing|safe }},
+                                borderColor: '#10b981',
+                                backgroundColor: 'rgba(16, 185, 129, 0.0)',
+                                tension: 0.4,
+                                borderWidth: 2,
+                                pointBackgroundColor: '#10b981'
+                            },
+                            {
+                                label: 'Speaking',
+                                data: {{ progress_data.speaking|safe }},
+                                borderColor: '#8b5cf6',
+                                backgroundColor: 'rgba(139, 92, 246, 0.0)',
+                                tension: 0.4,
+                                borderWidth: 2,
+                                pointBackgroundColor: '#8b5cf6'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: false,
+                                min: 4,
+                                max: 9,
+                                ticks: {
+                                    stepSize: 1
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false
+                            }
+                        }
+                    }
+                });
+
+                // Section Chart
+                const sectionCtx = document.getElementById('sectionChart').getContext('2d');
+                const sectionChart = new Chart(sectionCtx, {
+                    type: 'radar',
+                    data: {
+                        labels: ['Reading', 'Listening', 'Writing', 'Speaking'],
+                        datasets: [{
+                            label: 'Current Score',
+                            data: [
+                                {{ section_scores.reading }},
+                                {{ section_scores.listening }},
+                                {{ section_scores.writing }},
+                                {{ section_scores.speaking }}
+                            ],
+                            backgroundColor: 'rgba(37, 99, 235, 0.2)',
+                            borderColor: 'rgba(37, 99, 235, 1)',
+                            borderWidth: 2,
+                            pointBackgroundColor: 'rgba(37, 99, 235, 1)',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: 'rgba(37, 99, 235, 1)'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            r: {
+                                angleLines: {
+                                    display: true
+                                },
+                                suggestedMin: 4,
+                                suggestedMax: 9
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        }
+                    }
+                });
+            });
+        </script>
+    {% endblock %}
+{% endblock %}

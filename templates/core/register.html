@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Register - BandBooster{% endblock %}
+
+{% block content %}
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-tabs">
+                <a href="{% url 'login' %}" class="auth-tab">Login</a>
+                <a href="{% url 'register' %}" class="auth-tab active">Register</a>
+            </div>
+
+            <div class="auth-form">
+                <h2>Create an account</h2>
+                <p class="auth-subtitle">Enter your information to create your account</p>
+
+                {% if form.errors %}
+                    <div class="error-message">
+                        <p>Please correct the errors below.</p>
+                    </div>
+                {% endif %}
+
+                <form method="post" action="{% url 'register' %}">
+                    {% csrf_token %}
+
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label for="id_first_name">First name</label>
+                            {{ form.first_name }}
+                            {% if form.first_name.errors %}
+                                <div class="error-message">{{ form.first_name.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="form-group half">
+                            <label for="id_last_name">Last name</label>
+                            {{ form.last_name }}
+                            {% if form.last_name.errors %}
+                                <div class="error-message">{{ form.last_name.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_email">Email</label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                            <div class="error-message">{{ form.email.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_password1">Password</label>
+                        {{ form.password1 }}
+                        {% if form.password1.errors %}
+                            <div class="error-message">{{ form.password1.errors }}</div>
+                        {% endif %}
+                        <small class="form-text text-muted">Your password must be exactly 8 digits (numbers only).</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_password2">Confirm Password</label>
+                        {{ form.password2 }}
+                        {% if form.password2.errors %}
+                            <div class="error-message">{{ form.password2.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-check terms-check">
+                        {{ form.agree_terms }}
+                        <label for="id_agree_terms">I agree to the <a href="#">terms and conditions</a></label>
+                        {% if form.agree_terms.errors %}
+                            <div class="error-message">{{ form.agree_terms.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block">Create account</button>
+
+                    <!-- Add hidden next parameter if it exists in the URL -->
+                    {% if request.GET.next %}
+                        <input type="hidden" name="next" value="{{ request.GET.next }}">
+                    {% endif %}
+                </form>
+
+                <div class="auth-footer">
+                    <p>Already have an account? <a href="{% url 'login' %}">Sign in</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

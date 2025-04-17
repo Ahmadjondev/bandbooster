@@ -1,0 +1,568 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}IELTS Reading Test - BandBooster{% endblock %}
+
+{% block extra_css %}
+    <style>
+        body {
+            background-color: #f8fafc;
+            margin: 0;
+            padding: 0;
+        }
+
+        .test-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        .test-header {
+            background-color: #1e293b;
+            color: white;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .test-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .test-timer {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .timer-icon {
+            width: 18px;
+            height: 18px;
+        }
+
+        .timer-text {
+            font-weight: 600;
+        }
+
+        .test-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .passage {
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .passage-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: #1e293b;
+        }
+
+        .passage-content {
+            color: #334155;
+        }
+
+        .passage-content p {
+            margin-bottom: 1rem;
+        }
+
+        .questions-section {
+            margin-top: 2rem;
+        }
+
+        .questions-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #1e293b;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .question {
+            margin-bottom: 2rem;
+        }
+
+        .question-text {
+            font-weight: 500;
+            margin-bottom: 1rem;
+            color: #1e293b;
+        }
+
+        .answer-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .answer-option {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .answer-option:hover {
+            background-color: #f1f5f9;
+        }
+
+        .answer-option input {
+            margin: 0;
+        }
+
+        .answer-option label {
+            cursor: pointer;
+            flex-grow: 1;
+        }
+
+        .text-input-answer {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .text-input-answer:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+        }
+
+        .test-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .nav-button {
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .prev-button {
+            background-color: white;
+            color: #1e293b;
+            border: 1px solid #e2e8f0;
+        }
+
+        .prev-button:hover {
+            background-color: #f8fafc;
+        }
+
+        .next-button {
+            background-color: #1e293b;
+            color: white;
+            border: none;
+        }
+
+        .next-button:hover {
+            background-color: #0f172a;
+        }
+
+        .button-icon {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Progress bar */
+        .progress-container {
+            width: 100%;
+            background-color: #e2e8f0;
+            border-radius: 4px;
+            margin: 1rem 0;
+            height: 8px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: #3b82f6;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            .test-container {
+                padding: 0.5rem;
+            }
+
+            .test-content {
+                padding: 1rem;
+            }
+
+            .test-header {
+                flex-direction: column;
+                gap: 0.5rem;
+                align-items: flex-start;
+            }
+
+            .test-timer {
+                align-self: flex-end;
+            }
+        }
+
+        /* Add these new styles for section tabs */
+        .section-tabs {
+            display: flex;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .section-tab {
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .section-tab.active {
+            border-bottom-color: #3b82f6;
+            color: #3b82f6;
+        }
+
+        .section-tab:hover:not(.active) {
+            border-bottom-color: #e2e8f0;
+        }
+
+        .section-content {
+            display: none;
+        }
+
+        .section-content.active {
+            display: block;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="test-container">
+        <div class="test-header">
+            <div class="test-title">IELTS Reading Test</div>
+            <div class="test-timer">
+                <svg class="timer-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                <span class="timer-text" id="timer">60:00</span>
+            </div>
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-bar" style="width: 0%"></div>
+        </div>
+
+        <div class="test-content">
+            <!-- Section tabs -->
+            <div class="section-tabs">
+                {% for passage in reading_content.passages %}
+                    <div class="section-tab {% if forloop.first %}active{% endif %}" data-section="{{ passage.section }}">
+                        Section {{ passage.section }}
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Section content -->
+            {% for passage in reading_content.passages %}
+                <div class="section-content {% if forloop.first %}active{% endif %}" id="section-{{ passage.section }}">
+                    <div class="passage">
+                        <h2 class="passage-title">{{ passage.title }}</h2>
+                        <div class="passage-content">
+                            {{ passage.content|safe }}
+                        </div>
+                    </div>
+
+                    <div class="questions-section">
+                        <h3 class="questions-title">Questions for Section {{ passage.section }}</h3>
+
+                        <div class="questions">
+                            {% for question in reading_content.questions %}
+                                {% if question.section_number == passage.section %}
+                                    <div class="question">
+                                        <div class="question-text">{{ forloop.counter }}. {{ question.text }}</div>
+
+                                        {% if question.type == 'multiple_choice' %}
+                                            <div class="answer-options">
+                                                {% for option in question.options %}
+                                                    <div class="answer-option">
+                                                        <input type="radio" id="q{{ question.id }}_option{{ forloop.counter }}" name="question_{{ question.id }}" value="{{ option }}">
+                                                        <label for="q{{ question.id }}_option{{ forloop.counter }}">{{ option }}</label>
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+
+                                        {% elif question.type == 'true_false_notgiven' or question.type == 'true_false' %}
+                                            <div class="answer-options">
+                                                <div class="answer-option">
+                                                    <input type="radio" id="q{{ question.id }}_true" name="question_{{ question.id }}" value="True">
+                                                    <label for="q{{ question.id }}_true">True</label>
+                                                </div>
+                                                <div class="answer-option">
+                                                    <input type="radio" id="q{{ question.id }}_false" name="question_{{ question.id }}" value="False">
+                                                    <label for="q{{ question.id }}_false">False</label>
+                                                </div>
+                                                <div class="answer-option">
+                                                    <input type="radio" id="q{{ question.id }}_notgiven" name="question_{{ question.id }}" value="Not Given">
+                                                    <label for="q{{ question.id }}_notgiven">Not Given</label>
+                                                </div>
+                                            </div>
+
+                                        {% elif question.type == 'short_answer' %}
+                                            <input type="text" class="text-input-answer" name="question_{{ question.id }}" placeholder="Type your answer here">
+
+                                        {% elif question.type == 'matching' %}
+                                            <select class="text-input-answer" name="question_{{ question.id }}">
+                                                <option value="">Select an answer</option>
+                                                {% for option_key, option_value in question.options.items %}
+                                                    <option value="{{ option_key }}">{{ option_key }}: {{ option_value }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+
+            <form id="reading-test-form" method="post" action="{% url 'submit_reading' test_id=test.id %}">
+                {% csrf_token %}
+                <!-- Hidden inputs will be populated with JavaScript -->
+                <div class="test-navigation">
+                    <button type="button" class="nav-button prev-button" id="prev-section-btn">
+                        <svg class="button-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="19" y1="12" x2="5" y2="12"></line>
+                            <polyline points="12 19 5 12 12 5"></polyline>
+                        </svg>
+                        Previous Section
+                    </button>
+
+                    <button type="button" class="nav-button next-button" id="next-section-btn">
+                        Next Section
+                        <svg class="button-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </button>
+                </div>
+
+                <button type="submit" class="nav-button next-button" style="margin-top: 1rem; width: 100%;">
+                    Submit Test
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Loading overlay -->
+    <div class="loading-overlay" id="loading-overlay" style="display: none;">
+        <div class="spinner"></div>
+        <div class="loading-text">Submitting Your Answers</div>
+        <div class="loading-subtext">Please wait while we process your responses...</div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Section tabs functionality
+            const sectionTabs = document.querySelectorAll('.section-tab');
+            const sectionContents = document.querySelectorAll('.section-content');
+            let currentSectionIndex = 0;
+
+            function showSection(index) {
+                // Hide all sections
+                sectionTabs.forEach(tab => tab.classList.remove('active'));
+                sectionContents.forEach(content => content.classList.remove('active'));
+
+                // Show selected section
+                if (sectionTabs[index]) sectionTabs[index].classList.add('active');
+                if (sectionContents[index]) sectionContents[index].classList.add('active');
+
+                currentSectionIndex = index;
+
+                // Update navigation buttons
+                updateNavigationButtons();
+            }
+
+            sectionTabs.forEach((tab, index) => {
+                tab.addEventListener('click', () => {
+                    showSection(index);
+                });
+            });
+
+            // Navigation buttons
+            const prevSectionBtn = document.getElementById('prev-section-btn');
+            const nextSectionBtn = document.getElementById('next-section-btn');
+
+            function updateNavigationButtons() {
+                if (prevSectionBtn) {
+                    prevSectionBtn.disabled = currentSectionIndex === 0;
+                    prevSectionBtn.style.opacity = currentSectionIndex === 0 ? '0.5' : '1';
+                }
+
+                if (nextSectionBtn) {
+                    const isLastSection = currentSectionIndex === sectionTabs.length - 1;
+                    nextSectionBtn.textContent = isLastSection ? 'Review Answers' : 'Next Section';
+                    nextSectionBtn.disabled = false; // Always enabled
+                }
+            }
+
+            if (prevSectionBtn) {
+                prevSectionBtn.addEventListener('click', function() {
+                    if (currentSectionIndex > 0) {
+                        showSection(currentSectionIndex - 1);
+                    }
+                });
+            }
+
+            if (nextSectionBtn) {
+                nextSectionBtn.addEventListener('click', function() {
+                    if (currentSectionIndex < sectionTabs.length - 1) {
+                        showSection(currentSectionIndex + 1);
+                    } else {
+                        // If on last section, show a review modal or submit
+                        if (confirm('Are you ready to submit your answers? Make sure you have answered all questions.')) {
+                            document.getElementById('reading-test-form').submit();
+                        }
+                    }
+                });
+            }
+
+            // Initialize navigation buttons
+            updateNavigationButtons();
+
+            // Timer functionality
+            let timeLeft = 60 * 60; // 60 minutes in seconds
+            const timerElement = document.getElementById('timer');
+
+            function updateTimer() {
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+
+                timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    alert('Time is up! Your answers will be submitted automatically.');
+                    document.getElementById('reading-test-form').submit();
+                }
+
+                timeLeft--;
+            }
+
+            const timerInterval = setInterval(updateTimer, 1000);
+            updateTimer();
+
+            // Progress tracking
+            const questions = document.querySelectorAll('.question');
+            const progressBar = document.querySelector('.progress-bar');
+            const totalQuestions = questions.length;
+            let answeredQuestions = 0;
+
+            function updateProgress() {
+                const progressPercentage = (answeredQuestions / totalQuestions) * 100;
+                progressBar.style.width = `${progressPercentage}%`;
+            }
+
+            // Track radio button changes
+            const radioInputs = document.querySelectorAll('input[type="radio"]');
+            radioInputs.forEach(input => {
+                input.addEventListener('change', function() {
+                    const questionName = this.name;
+                    const questionInputs = document.querySelectorAll(`input[name="${questionName}"]`);
+                    const wasAlreadyAnswered = Array.from(questionInputs).some(input => input.dataset.answered === 'true');
+
+                    questionInputs.forEach(input => {
+                        input.dataset.answered = 'false';
+                    });
+
+                    this.dataset.answered = 'true';
+
+                    if (!wasAlreadyAnswered) {
+                        answeredQuestions++;
+                        updateProgress();
+                    }
+                });
+            });
+
+            // Track text input changes
+            const textInputs = document.querySelectorAll('input[type="text"], select');
+            textInputs.forEach(input => {
+                input.addEventListener('change', function() {
+                    if (this.value.trim() !== '' && !this.dataset.answered) {
+                        this.dataset.answered = 'true';
+                        answeredQuestions++;
+                        updateProgress();
+                    } else if (this.value.trim() === '' && this.dataset.answered) {
+                        this.dataset.answered = '';
+                        answeredQuestions--;
+                        updateProgress();
+                    }
+                });
+            });
+
+            // Form submission
+            const form = document.getElementById('reading-test-form');
+            const loadingOverlay = document.getElementById('loading-overlay');
+
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                // Collect all answers
+                const formData = new FormData();
+
+                // Add CSRF token
+                const csrfToken = document.querySelector('[name="csrfmiddlewaretoken"]').value;
+                formData.append('csrfmiddlewaretoken', csrfToken);
+
+                // Add radio button answers
+                radioInputs.forEach(input => {
+                    if (input.checked) {
+                        formData.append(input.name, input.value);
+                    }
+                });
+
+                // Add text input answers
+                textInputs.forEach(input => {
+                    if (input.value.trim() !== '') {
+                        formData.append(input.name, input.value);
+                    }
+                });
+
+                // Show loading overlay
+                if (loadingOverlay) {
+                    loadingOverlay.style.display = 'flex';
+                }
+
+                // Submit the form
+                form.submit();
+            });
+        });
+    </script>
+{% endblock %}

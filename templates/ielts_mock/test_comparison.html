@@ -1,0 +1,454 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Test Comparison - BandBooster{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Test Comparison Page Styles */
+    .comparison-container {
+        padding: 2rem;
+    }
+
+    .comparison-header {
+        margin-bottom: 2rem;
+    }
+
+    .comparison-header h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .comparison-header p {
+        color: var(--gray-color);
+    }
+
+    .history-tabs {
+        display: flex;
+        border-bottom: 1px solid var(--border-color);
+        margin-bottom: 2rem;
+    }
+
+    .history-tab {
+        padding: 1rem 1.5rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--gray-color);
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .history-tab:hover {
+        color: var(--primary-color);
+    }
+
+    .history-tab.active {
+        color: var(--primary-color);
+        border-bottom-color: var(--primary-color);
+    }
+
+    .history-tab svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    .comparison-content {
+        background-color: white;
+        border-radius: 0.75rem;
+        padding: 2rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+
+    .section-subtitle {
+        font-size: 0.875rem;
+        color: var(--gray-color);
+        margin-bottom: 1.5rem;
+    }
+
+    .chart-container {
+        height: 400px;
+        margin-bottom: 2rem;
+    }
+
+    .comparison-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 2rem;
+    }
+
+    .comparison-table th {
+        text-align: left;
+        padding: 1rem;
+        font-weight: 500;
+        color: var(--gray-color);
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .comparison-table td {
+        padding: 1rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .comparison-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .test-date {
+        font-size: 0.875rem;
+        color: var(--gray-color);
+    }
+
+    .test-score {
+        font-weight: 600;
+    }
+
+    .score-change {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        font-weight: 600;
+    }
+
+    .score-change.positive {
+        color: #10b981;
+    }
+
+    .score-change.negative {
+        color: #ef4444;
+    }
+
+    .score-change.neutral {
+        color: var(--gray-color);
+    }
+
+    /* Responsive styles */
+    @media (max-width: 768px) {
+        .history-tabs {
+            overflow-x: auto;
+            white-space: nowrap;
+            padding-bottom: 0.5rem;
+        }
+
+        .history-tab {
+            padding: 0.75rem 1rem;
+        }
+
+        .comparison-table {
+            display: block;
+            overflow-x: auto;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="comparison-container">
+    <div class="comparison-header">
+        <h1>First vs Latest Test Comparison</h1>
+        <p>Compare your first and most recent test results</p>
+    </div>
+
+    <div class="history-tabs">
+        <a href="{% url 'test_history' %}" class="history-tab {% if active_tab == 'overview' %}active{% endif %}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="20" x2="18" y2="10"></line>
+                <line x1="12" y1="20" x2="12" y2="4"></line>
+                <line x1="6" y1="20" x2="6" y2="14"></line>
+            </svg>
+            Progress Overview
+        </a>
+        <a href="{% url 'test_comparison' %}" class="history-tab {% if active_tab == 'comparison' %}active{% endif %}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 22h14"></path>
+                <path d="M5 2h14"></path>
+                <path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"></path>
+                <path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"></path>
+            </svg>
+            First vs Latest
+        </a>
+        <a href="{% url 'progress_overview' %}" class="history-tab {% if active_tab == 'progress' %}active{% endif %}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+            </svg>
+            Test History
+        </a>
+    </div>
+
+    <div class="comparison-content">
+        {% if first_test and latest_test %}
+            <div class="section-title">First vs Latest Test Comparison</div>
+            <div class="section-subtitle">See how much you've improved since your first test</div>
+
+            <div class="chart-container">
+                <canvas id="comparisonChart"></canvas>
+            </div>
+
+            <div class="section-title">Detailed Comparison</div>
+            <div class="section-subtitle">Detailed breakdown of your first and latest test scores</div>
+
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Section</th>
+                        <th>First Test ({{ first_test.completed_at|date:"M d, Y" }})</th>
+                        <th>Latest Test ({{ latest_test.completed_at|date:"M d, Y" }})</th>
+                        <th>Change</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Overall</td>
+                        <td class="test-score">{{ first_test.overall_score }}</td>
+                        <td class="test-score">{{ latest_test.overall_score }}</td>
+                        <td>
+                            {% if improvements.overall > 0 %}
+                            <div class="score-change positive">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="18 15 12 9 6 15"></polyline>
+                                </svg>
+                                +{{ improvements.overall }}
+                            </div>
+                            {% elif improvements.overall < 0 %}
+                            <div class="score-change negative">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg>
+                                {{ improvements.overall }}
+                            </div>
+                            {% else %}
+                            <div class="score-change neutral">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                                0
+                            </div>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Reading</td>
+                        <td>{{ first_test.reading_score }}</td>
+                        <td>{{ latest_test.reading_score }}</td>
+                        <td>
+                            {% if improvements.reading > 0 %}
+                            <div class="score-change positive">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="18 15 12 9 6 15"></polyline>
+                                </svg>
+                                +{{ improvements.reading }}
+                            </div>
+                            {% elif improvements.reading < 0 %}
+                            <div class="score-change negative">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg>
+                                {{ improvements.reading }}
+                            </div>
+                            {% else %}
+                            <div class="score-change neutral">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                                0
+                            </div>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Listening</td>
+                        <td>{{ first_test.listening_score }}</td>
+                        <td>{{ latest_test.listening_score }}</td>
+                        <td>
+                            {% if improvements.listening > 0 %}
+                            <div class="score-change positive">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="18 15 12 9 6 15"></polyline>
+                                </svg>
+                                +{{ improvements.listening }}
+                            </div>
+                            {% elif improvements.listening < 0 %}
+                            <div class="score-change negative">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg>
+                                {{ improvements.listening }}
+                            </div>
+                            {% else %}
+                            <div class="score-change neutral">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                                0
+                            </div>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Writing</td>
+                        <td>{{ first_test.writing_score }}</td>
+                        <td>{{ latest_test.writing_score }}</td>
+                        <td>
+                            {% if improvements.writing > 0 %}
+                            <div class="score-change positive">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="18 15 12 9 6 15"></polyline>
+                                </svg>
+                                +{{ improvements.writing }}
+                            </div>
+                            {% elif improvements.writing < 0 %}
+                            <div class="score-change negative">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg>
+                                {{ improvements.writing }}
+                            </div>
+                            {% else %}
+                            <div class="score-change neutral">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                                0
+                            </div>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Speaking</td>
+                        <td>{{ first_test.speaking_score|default:"-" }}</td>
+                        <td>{{ latest_test.speaking_score|default:"-" }}</td>
+                        <td>
+                            {% if improvements.speaking > 0 %}
+                            <div class="score-change positive">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="18 15 12 9 6 15"></polyline>
+                                </svg>
+                                +{{ improvements.speaking }}
+                            </div>
+                            {% elif improvements.speaking < 0 %}
+                            <div class="score-change negative">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg>
+                                {{ improvements.speaking }}
+                            </div>
+                            {% else %}
+                            <div class="score-change neutral">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                                0
+                            </div>
+                            {% endif %}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        {% else %}
+            <div class="section-title">Not Enough Data</div>
+            <div class="section-subtitle">You need at least two completed tests to see a comparison</div>
+            
+            <div style="text-align: center; padding: 3rem 0;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <p style="margin-top: 1rem; color: var(--gray-color);">Complete at least two tests to see your progress comparison</p>
+                <a href="{% url 'ielts_mock' %}" class="btn btn-primary" style="margin-top: 1rem;">Take a Test</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        {% if first_test and latest_test %}
+        // Chart.js configuration
+        const ctx = document.getElementById('comparisonChart').getContext('2d');
+        const comparisonChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Overall', 'Reading', 'Listening', 'Writing', 'Speaking'],
+                datasets: [
+                    {
+                        label: 'First Test',
+                        data: [
+                            {{ first_test.overall_score }}, 
+                            {{ first_test.reading_score }}, 
+                            {{ first_test.listening_score }}, 
+                            {{ first_test.writing_score }}, 
+                            {{ first_test.speaking_score|default:"0" }}
+                        ],
+                        backgroundColor: '#a5b4fc',
+                        borderColor: '#818cf8',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Latest Test',
+                        data: [
+                            {{ latest_test.overall_score }}, 
+                            {{ latest_test.reading_score }}, 
+                            {{ latest_test.listening_score }}, 
+                            {{ latest_test.writing_score }}, 
+                            {{ latest_test.speaking_score|default:"0" }}
+                        ],
+                        backgroundColor: '#86efac',
+                        borderColor: '#4ade80',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        min: 0,
+                        max: 9,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 20
+                        }
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        titleColor: '#1e293b',
+                        bodyColor: '#1e293b',
+                        borderColor: '#e2e8f0',
+                        borderWidth: 1,
+                        padding: 12,
+                        boxPadding: 6,
+                        usePointStyle: true
+                    }
+                }
+            }
+        });
+        {% endif %}
+    });
+</script>
+{% endblock %}
+{% endblock %}

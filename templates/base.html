@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}BandBooster - IELTS Preparation Platform{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/auth.css' %}">
+    {% block extra_css %}{% endblock %}
+    <link rel="icon" href="{% static 'images/logo.png' %}">
+</head>
+<body>
+{% if not 'login' in request.path and not 'register' in request.path and not 'dashboard' in request.path and not 'ielts-exam' in request.path and not 'ielts_mock' in request.path or 'history' in request.path or 'home' in request.path %}
+    <header>
+        <nav class="navbar">
+            <div class="container">
+                <a href="/" class="logo">
+                    <img src="{% static 'images/logo.png' %}" alt="BandBooster">
+                    BandBooster
+                </a>
+                <div class="nav-links">
+                    <a href="#features">Features</a>
+                    <a href="#pricing">Pricing</a>
+                    <a href="#testimonials">Testimonials</a>
+                    <a href="#faq">FAQ</a>
+                </div>
+                <div class="auth-buttons">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'dashboard' %}" class="login">Dashboard</a>
+                        <a href="{% url 'logout' %}" class="signup">Logout</a>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="login">Login</a>
+                        <a href="{% url 'register' %}" class="signup">Sign Up</a>
+                    {% endif %}
+                </div>
+            </div>
+        </nav>
+    </header>
+{% endif %}
+
+<main>
+    {% block content %}{% endblock %}
+</main>
+
+{% if not 'login' in request.path and not 'register' in request.path and not 'dashboard' in request.path and not 'ielts-exam' in request.path and not 'ielts_mock' in request.path or 'history' in request.path or 'home' in request.path %}
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <a href="/" class="logo">
+                        <img src="{% static 'images/logo.png' %}" alt="BandBooster">
+                        BandBooster
+                    </a>
+                    <p>Helping IELTS candidates worldwide to achieve their target scores.</p>
+                    <div class="social-links">
+                        <a href="#"><img src="{% static 'images/icons/facebook.svg' %}" alt="Facebook"></a>
+                        <a href="#"><img src="{% static 'images/icons/twitter.svg' %}" alt="Twitter"></a>
+                        <a href="#"><img src="{% static 'images/icons/instagram.svg' %}" alt="Instagram"></a>
+                    </div>
+                </div>
+                <div class="footer-links">
+                    <h3>Services</h3>
+                    <ul>
+                        <li><a href="#">IELTS Practice</a></li>
+                        <li><a href="#">Mock Tests</a></li>
+                        <li><a href="#">Writing Feedback</a></li>
+                        <li><a href="#">Speaking Practice</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h3>Company</h3>
+                    <ul>
+                        <li><a href="#">About</a></li>
+                        <li><a href="#">Careers</a></li>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h3>Legal</h3>
+                    <ul>
+                        <li><a href="#">Terms</a></li>
+                        <li><a href="#">Privacy</a></li>
+                        <li><a href="#">Cookies</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2023 BandBooster. All rights reserved.</p>
+                <div class="footer-bottom-links">
+                    <a href="#">English</a>
+                    <a href="#">Sitemap</a>
+                    <a href="#">Contact</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+{% endif %}
+
+<script src="{% static 'js/main.js' %}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

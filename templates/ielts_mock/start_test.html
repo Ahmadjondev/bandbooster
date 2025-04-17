@@ -1,0 +1,351 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Start IELTS Mock Test - BandBooster{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <style>
+        .start-test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .start-test-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .start-test-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--dark-color);
+        }
+
+        .start-test-header p {
+            color: var(--gray-color);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .test-info {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .test-info h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--dark-color);
+        }
+
+        .info-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+            padding-bottom: 1.25rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .info-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .info-icon {
+            width: 24px;
+            height: 24px;
+            color: var(--primary-color);
+            flex-shrink: 0;
+        }
+
+        .info-content h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--dark-color);
+        }
+
+        .info-content p {
+            font-size: 0.95rem;
+            color: var(--gray-color);
+            margin: 0;
+        }
+
+        .coin-info {
+            background-color: rgba(37, 99, 235, 0.05);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .coin-icon {
+            width: 40px;
+            height: 40px;
+            color: #f59e0b;
+            flex-shrink: 0;
+        }
+
+        .coin-content h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--dark-color);
+        }
+
+        .coin-content p {
+            font-size: 0.95rem;
+            color: var(--gray-color);
+            margin: 0;
+        }
+
+        .coin-balance {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .action-button {
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .action-button.primary {
+            background-color: #1e293b;
+            color: white;
+            border: none;
+        }
+
+        .action-button.primary:hover {
+            background-color: #0f172a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.15);
+        }
+
+        .action-button.secondary {
+            background-color: white;
+            color: var(--dark-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .action-button.secondary:hover {
+            background-color: #f8fafc;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Loading overlay styles */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+
+        .loading-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid rgba(37, 99, 235, 0.2);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s linear infinite;
+            margin-bottom: 1.5rem;
+        }
+
+        .loading-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .loading-subtext {
+            font-size: 0.95rem;
+            color: var(--gray-color);
+            text-align: center;
+            max-width: 400px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="dashboard-container">
+        <!-- Include the sidebar -->
+        {% include 'core/partials/sidebar.html' with active_page='ielts_mock' %}
+
+        <main class="dashboard-main">
+            <div class="start-test-container">
+                <div class="start-test-header">
+                    <h1>Start IELTS Mock Test</h1>
+                    <p>You're about to start a full IELTS mock test. Please read the information below before proceeding.</p>
+                </div>
+
+                <div class="test-info">
+                    <h2>Test Information</h2>
+                    <ul class="info-list">
+                        <li class="info-item">
+                            <div class="info-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polyline points="12 6 12 12 16 14"></polyline>
+                                </svg>
+                            </div>
+                            <div class="info-content">
+                                <h3>Test Duration</h3>
+                                <p>The complete test takes approximately 2 hours and 45 minutes to complete. You can pause between sections if needed.</p>
+                            </div>
+                        </li>
+                        <li class="info-item">
+                            <div class="info-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                                    <polyline points="10 9 9 9 8 9"></polyline>
+                                </svg>
+                            </div>
+                            <div class="info-content">
+                                <h3>Test Format</h3>
+                                <p>The test includes all four IELTS sections: Reading (60 minutes), Listening (30 minutes), Writing (60 minutes), and a simulated Speaking score.</p>
+                            </div>
+                        </li>
+                        <li class="info-item">
+                            <div class="info-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="7 10 12 15 17 10"></polyline>
+                                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                                </svg>
+                            </div>
+                            <div class="info-content">
+                                <h3>Results</h3>
+                                <p>After completing all sections, you'll receive a detailed score report with band scores for each section and an overall band score.</p>
+                            </div>
+                        </li>
+                        <li class="info-item">
+                            <div class="info-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                </svg>
+                            </div>
+                            <div class="info-content">
+                                <h3>AI-Generated Content</h3>
+                                <p>This test uses AI to generate unique test content that simulates the real IELTS exam. Your writing responses will be evaluated by AI to provide feedback and scores.</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="coin-info">
+                    <div class="coin-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                    </div>
+                    <div class="coin-content">
+                        <h3>Coin Information</h3>
+                        <p>Taking a mock test costs <strong>100 coins</strong>. Your current balance is <span class="coin-balance">{{ request.user.profile.coins }} coins</span>.</p>
+                        <p>You can earn more coins by completing practice exercises and daily challenges.</p>
+                    </div>
+                </div>
+
+                <form method="post" action="{% url 'start_test' %}" id="start-test-form">
+                    {% csrf_token %}
+                    <div class="action-buttons">
+                        <a href="{% url 'mock_test_home' %}" class="action-button secondary">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="19" y1="12" x2="5" y2="12"></line>
+                                <polyline points="12 19 5 12 12 5"></polyline>
+                            </svg>
+                            Back
+                        </a>
+
+                        <button type="submit" class="action-button primary" {% if request.user.profile.coins < 100 %}disabled{% endif %}>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                            </svg>
+                            Start Test
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <!-- Loading overlay -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="spinner"></div>
+        <div class="loading-text">Generating Your Test</div>
+        <div class="loading-subtext">Please wait while we prepare your personalized IELTS mock test. This may take a few moments...</div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const startTestForm = document.getElementById('start-test-form');
+            const loadingOverlay = document.getElementById('loading-overlay');
+
+            if (startTestForm) {
+                startTestForm.addEventListener('submit', function(e) {
+                    // Show loading overlay
+                    loadingOverlay.classList.add('active');
+
+                    // Allow form submission to continue
+                    // The page will navigate to the test when ready
+                });
+            }
+        });
+    </script>
+{% endblock %}

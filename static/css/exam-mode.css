@@ -1,0 +1,179 @@
+/* Exam Mode Styles */
+body.exam-mode {
+    overflow-x: hidden;
+}
+
+/* Loading Overlay */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(15, 23, 42, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.loading-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.loading-content {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    max-width: 90%;
+}
+
+.loading-spinner {
+    display: inline-block;
+    width: 50px;
+    height: 50px;
+    border: 5px solid #e2e8f0;
+    border-radius: 50%;
+    border-top-color: #2563eb;
+    animation: spin 1s ease-in-out infinite;
+    margin-bottom: 1rem;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.loading-message {
+    font-size: 1.1rem;
+    color: #0f172a;
+    font-weight: 500;
+}
+
+/* Exam Mode Notice */
+.exam-mode-notice {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #0f172a;
+    color: white;
+    padding: 0.5rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 1000;
+}
+
+.exam-mode-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+}
+
+.exam-mode-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background-color: #22c55e;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 6px rgba(34, 197, 94, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+    }
+}
+
+.exam-mode-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.exam-mode-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.exam-mode-button:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Adjust main content to account for exam mode notice */
+body.exam-mode .dashboard-main {
+    padding-top: 3rem;
+}
+
+/* Timer styles */
+.exam-timer {
+    position: fixed;
+    top: 3rem;
+    right: 1rem;
+    background-color: white;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    z-index: 900;
+}
+
+.exam-timer.warning {
+    background-color: #fef2f2;
+    color: #ef4444;
+    animation: pulse-warning 2s infinite;
+}
+
+@keyframes pulse-warning {
+    0% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+    }
+}
+
+.timer-icon {
+    color: #64748b;
+}
+
+.exam-timer.warning .timer-icon {
+    color: #ef4444;
+}
+
+.timer-display {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #0f172a;
+}
+
+.exam-timer.warning .timer-display {
+    color: #ef4444;
+}

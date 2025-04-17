@@ -1,0 +1,336 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block title %}Shared IELTS Test Results{% endblock %}
+
+{% block extra_css %}
+    <style>
+        /* Same styles as test_results.html but with some modifications for shared view */
+        .results-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: #1e293b;
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #121927;
+            color: white;
+            padding: 1.5rem 2rem;
+        }
+
+        .results-header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .shared-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .results-content {
+            padding: 2rem;
+        }
+
+        .results-main {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .overall-score {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .score-value {
+            font-size: 5rem;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+
+        .score-label {
+            font-size: 1.25rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .section-scores {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .section-score {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .section-name {
+            font-weight: 500;
+            font-size: 1.1rem;
+            width: 100px;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 8px;
+            background-color: #e2e8f0;
+            border-radius: 4px;
+            margin: 0 1rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: #2563eb;
+            border-radius: 4px;
+        }
+
+        .section-value {
+            font-weight: 700;
+            font-size: 1.1rem;
+            width: 30px;
+            text-align: right;
+        }
+
+        .interpretation {
+            background-color: #f8fafc;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .interpretation h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-top: 0;
+            margin-bottom: 1rem;
+        }
+
+        .interpretation p {
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        .strengths-weaknesses {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .strengths-card, .weaknesses-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-top: 0;
+            margin-bottom: 1.25rem;
+        }
+
+        .item-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .list-item {
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .list-item-icon {
+            margin-right: 0.75rem;
+            margin-top: 0.25rem;
+            flex-shrink: 0;
+        }
+
+        .list-item-icon.success {
+            color: #10b981;
+        }
+
+        .list-item-icon.error {
+            color: #ef4444;
+        }
+
+        .list-item-text {
+            line-height: 1.5;
+        }
+
+        .shared-footer {
+            text-align: center;
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background-color: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .shared-footer p {
+            margin-bottom: 1rem;
+            color: #64748b;
+        }
+
+        .shared-footer .btn {
+            background-color: #2563eb;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: inline-block;
+        }
+
+        .shared-footer .btn:hover {
+            background-color: #1d4ed8;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .results-main {
+                grid-template-columns: 1fr;
+            }
+
+            .strengths-weaknesses {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="results-container">
+        <div class="results-header">
+            <h1>IELTS Mock Test Results</h1>
+            <div class="shared-badge">Shared Results</div>
+        </div>
+
+        <div class="results-content">
+            <div class="results-main">
+                <div class="overall-score">
+                    <div class="score-value">{{ test.overall_score }}</div>
+                    <div class="score-label">Overall Band Score</div>
+                </div>
+
+                <div class="section-scores">
+                    <div class="section-score">
+                        <div class="section-name">Reading</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: {{ test.reading_score|divide:9|multiply:100 }}%;"></div>
+                        </div>
+                        <div class="section-value">{{ test.reading_score }}</div>
+                    </div>
+
+                    <div class="section-score">
+                        <div class="section-name">Listening</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: {{ test.listening_score|divide:9|multiply:100 }}%;"></div>
+                        </div>
+                        <div class="section-value">{{ test.listening_score }}</div>
+                    </div>
+
+                    <div class="section-score">
+                        <div class="section-name">Writing</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: {{ test.writing_score|divide:9|multiply:100 }}%;"></div>
+                        </div>
+                        <div class="section-value">{{ test.writing_score }}</div>
+                    </div>
+
+                    <div class="section-score">
+                        <div class="section-name">Speaking</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: {{ test.speaking_score|divide:9|multiply:100 }}%;"></div>
+                        </div>
+                        <div class="section-value">{{ test.speaking_score }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="interpretation">
+                <h2>Score Interpretation</h2>
+                <p>
+                    This overall band score of {{ test.overall_score }} indicates a competent user of English.
+                    The test-taker generally has effective command of the language despite some inaccuracies and misunderstandings.
+                    They can use and understand fairly complex language, particularly in familiar situations.
+                </p>
+            </div>
+
+            <div class="strengths-weaknesses">
+                <div class="strengths-card">
+                    <h2 class="card-title">Strengths</h2>
+                    <div class="item-list">
+                        {% for strength in strengths %}
+                            <div class="list-item">
+                                <div class="list-item-icon success">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                    </svg>
+                                </div>
+                                <div class="list-item-text">{{ strength }}</div>
+                            </div>
+                        {% empty %}
+                            <div class="list-item">
+                                <div class="list-item-text">No specific strengths identified.</div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="weaknesses-card">
+                    <h2 class="card-title">Areas for Improvement</h2>
+                    <div class="item-list">
+                        {% for area in areas_for_improvement %}
+                            <div class="list-item">
+                                <div class="list-item-icon error">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <line x1="15" y1="9" x2="9" y2="15"></line>
+                                        <line x1="9" y1="9" x2="15" y2="15"></line>
+                                    </svg>
+                                </div>
+                                <div class="list-item-text">{{ area }}</div>
+                            </div>
+                        {% empty %}
+                            <div class="list-item">
+                                <div class="list-item-text">No specific areas for improvement identified.</div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="shared-footer">
+            <p>Want to improve your IELTS score? Try BandBooster today!</p>
+            <a href="{% url 'index' %}" class="btn">Visit BandBooster</a>
+        </div>
+    </div>
+{% endblock %}

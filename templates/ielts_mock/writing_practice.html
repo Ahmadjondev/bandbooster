@@ -1,0 +1,505 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}IELTS Writing Practice - BandBooster{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+<style>
+    .writing-practice-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+        display: flex;
+        gap: 2rem;
+    }
+    
+    .writing-sidebar {
+        width: 300px;
+        flex-shrink: 0;
+    }
+    
+    .writing-main {
+        flex: 1;
+    }
+    
+    .writing-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.5rem;
+        background-color: #1e293b;
+        color: white;
+        border-radius: var(--border-radius);
+        margin-bottom: 1.5rem;
+    }
+    
+    .writing-header h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 0;
+    }
+    
+    .timer {
+        font-size: 1rem;
+        font-weight: 500;
+        background-color: rgba(255, 255, 255, 0.1);
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .timer svg {
+        width: 18px;
+        height: 18px;
+    }
+    
+    .writing-content {
+        background-color: white;
+        border-radius: var(--border-radius);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .task-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    
+    .task-description {
+        font-size: 0.875rem;
+        color: var(--gray-color);
+        margin-bottom: 1.5rem;
+    }
+    
+    .task-prompt {
+        font-size: 1rem;
+        line-height: 1.6;
+        color: var(--dark-color);
+        margin-bottom: 1.5rem;
+        white-space: pre-line;
+        padding: 1.5rem;
+        background-color: #f8fafc;
+        border-radius: var(--border-radius);
+        border-left: 4px solid #1e293b;
+    }
+    
+    .word-count {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        color: var(--gray-color);
+    }
+    
+    .word-count-number {
+        font-weight: 500;
+    }
+    
+    .word-count-warning {
+        color: #ef4444;
+    }
+    
+    .response-textarea {
+        width: 100%;
+        min-height: 300px;
+        padding: 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+        font-size: 1rem;
+        line-height: 1.6;
+        resize: vertical;
+    }
+    
+    .submit-container {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 1rem;
+    }
+    
+    .submit-button {
+        padding: 0.75rem 1.5rem;
+        background-color: #1e293b;
+        color: white;
+        border: none;
+        border-radius: var(--border-radius);
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .submit-button:hover {
+        background-color: #0f172a;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 14px rgba(15, 23, 42, 0.15);
+    }
+    
+    .submit-button svg {
+        width: 18px;
+        height: 18px;
+    }
+    
+    .writing-tips {
+        background-color: white;
+        border-radius: var(--border-radius);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .tips-title {
+        font-size: 1.125rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .tips-title svg {
+        width: 20px;
+        height: 20px;
+        color: #1e293b;
+    }
+    
+    .tips-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .tips-list li {
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 0.875rem;
+        line-height: 1.5;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .tips-list li:last-child {
+        border-bottom: none;
+    }
+    
+    .tips-list li svg {
+        width: 16px;
+        height: 16px;
+        color: #10b981;
+        margin-top: 0.25rem;
+        flex-shrink: 0;
+    }
+    
+    .previous-practices {
+        background-color: white;
+        border-radius: var(--border-radius);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        padding: 1.5rem;
+    }
+    
+    .practices-title {
+        font-size: 1.125rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .practices-title svg {
+        width: 20px;
+        height: 20px;
+        color: #1e293b;
+    }
+    
+    .practices-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .practice-item {
+        padding: 1rem;
+        border-bottom: 1px solid var(--border-color);
+        transition: all 0.2s;
+    }
+    
+    .practice-item:last-child {
+        border-bottom: none;
+    }
+    
+    .practice-item:hover {
+        background-color: #f8fafc;
+    }
+    
+    .practice-date {
+        font-size: 0.75rem;
+        color: var(--gray-color);
+        margin-bottom: 0.25rem;
+    }
+    
+    .practice-type {
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    .practice-score {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+    }
+    
+    .practice-score-value {
+        font-weight: 600;
+    }
+    
+    .practice-actions {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 0.5rem;
+    }
+    
+    .view-practice-btn {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        background-color: #f1f5f9;
+        border: none;
+        border-radius: 0.25rem;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .view-practice-btn:hover {
+        background-color: #e2e8f0;
+    }
+    
+    @media (max-width: 992px) {
+        .writing-practice-container {
+            flex-direction: column;
+        }
+        
+        .writing-sidebar {
+            width: 100%;
+            order: 2;
+        }
+        
+        .writing-main {
+            order: 1;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Include the sidebar -->
+    {% include 'core/partials/sidebar.html' with active_page='writing' %}
+    
+    <main class="dashboard-main">
+        <div class="writing-practice-container">
+            <div class="writing-main">
+                <div class="writing-header">
+                    <h1>{{ task_title }}</h1>
+                    <div class="timer" id="timer">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                        <span id="timer-text">{{ time_limit }}:00</span>
+                    </div>
+                </div>
+                
+                <div class="writing-content">
+                    <div class="task-title">{{ task_title }}</div>
+                    <div class="task-description">{{ task_description }}</div>
+                    <div class="task-prompt">{{ practice.prompt }}</div>
+                    
+                    <form method="post" action="{% url 'submit_writing_practice' %}" id="writing-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="practice_id" value="{{ practice.id }}">
+                        
+                        <div class="word-count">
+                            <div>
+                                <span>Word Count: </span>
+                                <span class="word-count-number" id="word-count">0</span>
+                                <span> words</span>
+                            </div>
+                            <div class="word-count-warning" id="word-count-warning"></div>
+                        </div>
+                        
+                        <textarea class="response-textarea" id="response" name="response" placeholder="Write your response here..."></textarea>
+                        
+                        <div class="submit-container">
+                            <button type="submit" class="submit-button">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                                </svg>
+                                Submit for Evaluation
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="writing-sidebar">
+                <div class="writing-tips">
+                    <div class="tips-title">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="16" x2="12" y2="12"></line>
+                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                        </svg>
+                        Writing Tips
+                    </div>
+                    <ul class="tips-list">
+                        <li>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            Read the prompt carefully and make sure you understand what is being asked.
+                        </li>
+                        <li>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            Plan your response before you start writing. Spend 3-5 minutes outlining your ideas.
+                        </li>
+                        <li>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            Use a clear structure with an introduction, body paragraphs, and conclusion.
+                        </li>
+                        <li>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            Use a variety of vocabulary and sentence structures to demonstrate your language skills.
+                        </li>
+                        <li>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            Use linking words and phrases to connect your ideas and make your writing flow.
+                        </li>
+                        <li>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            Leave 2-3 minutes at the end to review your work and correct any errors.
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="previous-practices">
+                    <div class="practices-title">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="1 4 1 10 7 10"></polyline>
+                            <polyline points="23 20 23 14 17 14"></polyline>
+                            <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path>
+                        </svg>
+                        Previous Practices
+                    </div>
+                    <ul class="practices-list">
+                        {% for practice in user_practices %}
+                        <li class="practice-item">
+                            <div class="practice-date">{{ practice.created_at|date:"M d, Y" }}</div>
+                            <div class="practice-type">{{ practice.get_task_type_display }}</div>
+                            {% if practice.overall_score %}
+                            <div class="practice-score">
+                                <span>Score:</span>
+                                <span class="practice-score-value">{{ practice.overall_score }}</span>
+                            </div>
+                            {% endif %}
+                            <div class="practice-actions">
+                                <a href="{% url 'writing_practice_results' practice_id=practice.id %}" class="view-practice-btn">View Results</a>
+                            </div>
+                        </li>
+                        {% empty %}
+                        <li class="practice-item">
+                            <p>No previous practices yet.</p>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Word count functionality
+        const responseTextarea = document.getElementById('response');
+        const wordCount = document.getElementById('word-count');
+        const wordCountWarning = document.getElementById('word-count-warning');
+        
+        function countWords(text) {
+            return text.trim().split(/\s+/).filter(word => word.length > 0).length;
+        }
+        
+        function updateWordCount() {
+            const words = countWords(responseTextarea.value);
+            wordCount.textContent = words;
+            
+            // Set minimum word count based on task type
+            const minWords = "{{ practice.task_type }}" === "task1" ? 150 : 250;
+            
+            if (words < minWords) {
+                wordCountWarning.textContent = `You need at least ${minWords - words} more words.`;
+            } else {
+                wordCountWarning.textContent = '';
+            }
+        }
+        
+        responseTextarea.addEventListener('input', updateWordCount);
+        
+        // Timer functionality
+        const timerElement = document.getElementById('timer-text');
+        let timeLeft = {{ time_limit }} * 60; // Convert minutes to seconds
+        
+        function updateTimer() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            
+            timerElement.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+            
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                alert('Time is up! Your answer will be submitted automatically.');
+                document.getElementById('writing-form').submit();
+            }
+            
+            timeLeft--;
+        }
+        
+        const timerInterval = setInterval(updateTimer, 1000);
+        updateTimer();
+        
+        // Form submission confirmation
+        document.getElementById('writing-form').addEventListener('submit', function(e) {
+            const words = countWords(responseTextarea.value);
+            const minWords = "{{ practice.task_type }}" === "task1" ? 150 : 250;
+            
+            if (words < minWords) {
+                if (!confirm(`You have only written ${words} words, which is less than the recommended minimum of ${minWords} words. Are you sure you want to submit?`)) {
+                    e.preventDefault();
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,554 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}IELTS Mock Test - BandBooster{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <style>
+        /* IELTS Mock Test specific styles */
+        .mock-test-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .mock-test-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .mock-test-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--dark-color);
+        }
+
+        .mock-test-header p {
+            color: var(--gray-color);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .test-type-section {
+            margin-bottom: 3rem;
+        }
+
+        .test-type-section h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .test-type-section p {
+            color: var(--gray-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .test-types {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .test-type-card {
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background-color: #f8fafc;
+        }
+
+        .test-type-card:hover, .test-type-card.selected {
+            border-color: var(--primary-color);
+            background-color: rgba(37, 99, 235, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .test-type-card.selected {
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.15);
+        }
+
+        .test-type-card h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--dark-color);
+        }
+
+        .test-type-card p {
+            font-size: 0.9rem;
+            color: var(--gray-color);
+        }
+
+        .info-box {
+            background-color: rgba(37, 99, 235, 0.05);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .info-icon {
+            color: var(--primary-color);
+            flex-shrink: 0;
+        }
+
+        .info-content h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--dark-color);
+        }
+
+        .info-content p {
+            font-size: 0.9rem;
+            color: var(--gray-color);
+        }
+
+        .start-test-btn {
+            display: inline-block;
+            background-color: var(--dark-color);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .start-test-btn:hover {
+            background-color: #0f172a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.15);
+        }
+
+        .test-format-section {
+            margin-top: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .test-format-section h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .test-format-section p {
+            color: var(--gray-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .test-sections {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .test-section-card {
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .test-section-card:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+        }
+
+        .section-icon {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+        }
+
+        .test-section-card h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--dark-color);
+        }
+
+        .test-section-card p {
+            font-size: 0.8rem;
+            color: var(--gray-color);
+            margin-bottom: 0.25rem;
+        }
+
+        .practice-skills {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+        }
+
+        .practice-skills p {
+            color: var(--gray-color);
+            margin: 0;
+        }
+
+        .practice-skills-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary-color);
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .practice-skills-btn:hover {
+            transform: translateX(5px);
+        }
+
+        @media (max-width: 768px) {
+            .test-types {
+                grid-template-columns: 1fr;
+            }
+
+            .test-sections {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .test-sections {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Full-screen mode styles */
+        .fullscreen-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            z-index: 9999;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+
+        .exit-fullscreen {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            background-color: rgba(30, 41, 59, 0.8);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            padding: 0.5rem 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            z-index: 10000;
+            transition: all 0.3s ease;
+        }
+
+        .exit-fullscreen:hover {
+            background-color: rgba(15, 23, 42, 1);
+        }
+
+        /* Add a data attribute to the start button for test type */
+        #start-academic-test {
+            position: relative;
+        }
+
+        /* Styles for when in full-screen mode */
+        :fullscreen .mock-test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        :fullscreen .dashboard-sidebar {
+            display: none;
+        }
+
+        :fullscreen .dashboard-main {
+            margin-left: 0;
+            width: 100%;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="dashboard-container">
+        <!-- Include the sidebar -->
+        {% include 'core/partials/sidebar.html' with active_page='ielts_mock' %}
+
+        <main class="dashboard-main">
+            {% if full_screen %}
+                <div class="fullscreen-container">
+                    <button class="exit-fullscreen" onclick="exitFullScreen()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path>
+                        </svg>
+                        Exit Full Screen
+                    </button>
+
+                    <div class="mock-test-header">
+                        <h1>IELTS {{ test_type|title }} Mock Test</h1>
+                        <p>You are now in full-screen mode. Please complete the test without exiting this mode.</p>
+                    </div>
+
+                    <!-- Here you would include the actual test content -->
+                    <div class="test-content">
+                        <p>The test will begin shortly. Please read the instructions carefully.</p>
+                        <!-- Test instructions and content would go here -->
+                    </div>
+                </div>
+
+                <script>
+                    function exitFullScreen() {
+                        if (document.exitFullscreen) {
+                            document.exitFullscreen();
+                        } else if (document.mozCancelFullScreen) {
+                            document.mozCancelFullScreen();
+                        } else if (document.webkitExitFullscreen) {
+                            document.webkitExitFullscreen();
+                        } else if (document.msExitFullscreen) {
+                            document.msExitFullscreen();
+                        }
+
+                        // Redirect back to the mock test page
+                        window.location.href = "{% url 'ielts_mock' %}";
+                    }
+
+                    // Listen for ESC key to handle exiting full-screen
+                    document.addEventListener('fullscreenchange', handleFullScreenChange);
+                    document.addEventListener('webkitfullscreenchange', handleFullScreenChange);
+                    document.addEventListener('mozfullscreenchange', handleFullScreenChange);
+                    document.addEventListener('MSFullscreenChange', handleFullScreenChange);
+
+                    function handleFullScreenChange() {
+                        if (!document.fullscreenElement &&
+                            !document.webkitFullscreenElement &&
+                            !document.mozFullScreenElement &&
+                            !document.msFullscreenElement) {
+                            // User has exited full-screen mode
+                            window.location.href = "{% url 'ielts_mock' %}";
+                        }
+                    }
+                </script>
+            {% else %}
+                <!-- Original content starts here -->
+                <div class="mock-test-container">
+                    <div class="mock-test-header">
+                        <h1>IELTS Mock Test</h1>
+                        <p>Take a full-length practice test that simulates the real IELTS exam. Our AI will generate personalized questions for all sections.</p>
+                    </div>
+
+                    <div class="test-type-section">
+                        <h2>Choose Your Test Type</h2>
+                        <p>Select the IELTS test format that matches your goals</p>
+
+                        <div class="test-types">
+                            <div class="test-type-card selected" id="academic-test">
+                                <h3>Academic</h3>
+                                <p>For higher education admission and professional registration in English-speaking environments.</p>
+                            </div>
+
+                            <div class="test-type-card" id="general-test">
+                                <h3>General Training</h3>
+                                <p>For work experience, training programs, or migration to English-speaking countries.</p>
+                            </div>
+                        </div>
+
+                        <div class="info-box">
+                            <div class="info-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                                </svg>
+                            </div>
+                            <div class="info-content">
+                                <h3>About This Test</h3>
+                                <p>This is a full-length IELTS mock test that simulates the real exam. When you start, our AI will generate unique questions for all four sections. The test takes approximately 2 hours and 45 minutes to complete.</p>
+                            </div>
+                        </div>
+
+                        <button class="start-test-btn" id="start-academic-test" data-test-type="academic">Start IELTS Academic Exam</button>
+                        <span style="margin-left: 1rem; color: var(--gray-color);">You'll receive detailed feedback and a band score estimate after completion.</span>
+                    </div>
+
+                    <div class="test-format-section">
+                        <h2>Test Format</h2>
+                        <p>The IELTS exam consists of four sections</p>
+
+                        <div class="test-sections">
+                            <div class="test-section-card">
+                                <div class="section-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                                        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                                    </svg>
+                                </div>
+                                <h3>Reading</h3>
+                                <p>60 minutes, 40 questions</p>
+                                <p>across 3 passages</p>
+                            </div>
+
+                            <div class="test-section-card">
+                                <div class="section-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                                        <line x1="12" y1="19" x2="12" y2="23"></line>
+                                        <line x1="8" y1="23" x2="16" y2="23"></line>
+                                    </svg>
+                                </div>
+                                <h3>Listening</h3>
+                                <p>30 minutes, 40 questions</p>
+                                <p>across 4 sections</p>
+                            </div>
+
+                            <div class="test-section-card">
+                                <div class="section-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M12 20h9"></path>
+                                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                                    </svg>
+                                </div>
+                                <h3>Writing</h3>
+                                <p>60 minutes, 2 tasks</p>
+                                <p>(150 and 250 words)</p>
+                            </div>
+
+                            <div class="test-section-card">
+                                <div class="section-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                                        <line x1="12" y1="19" x2="12" y2="23"></line>
+                                        <line x1="8" y1="23" x2="16" y2="23"></line>
+                                    </svg>
+                                </div>
+                                <h3>Speaking</h3>
+                                <p>11-14 minutes, 3 parts</p>
+                                <p>with an examiner</p>
+                            </div>
+                        </div>
+
+                        <div class="practice-skills">
+                            <p>Want to practice individual skills first?</p>
+                            <a href="{% url 'dashboard' %}" class="practice-skills-btn">
+                                Practice Skills
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                    <polyline points="12 5 19 12 12 19"></polyline>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+            {% if full_screen %}
+                <!-- Close the fullscreen container div -->
+            {% endif %}
+        </main>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Test type selection
+            const academicTest = document.getElementById('academic-test');
+            const generalTest = document.getElementById('general-test');
+            const startButton = document.getElementById('start-academic-test');
+
+            academicTest.addEventListener('click', function() {
+                academicTest.classList.add('selected');
+                generalTest.classList.remove('selected');
+                startButton.textContent = 'Start IELTS Academic Exam';
+                startButton.setAttribute('data-test-type', 'academic');
+            });
+
+            generalTest.addEventListener('click', function() {
+                generalTest.classList.add('selected');
+                academicTest.classList.remove('selected');
+                startButton.textContent = 'Start IELTS General Training Exam';
+                startButton.setAttribute('data-test-type', 'general');
+            });
+
+            // Start test button with full-screen mode
+            startButton.addEventListener('click', function(e) {
+                e.preventDefault();
+
+                // Create a form to submit the test type
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '{% url "ielts_mock" %}';
+
+                // Add CSRF token
+                const csrfToken = document.createElement('input');
+                csrfToken.type = 'hidden';
+                csrfToken.name = 'csrfmiddlewaretoken';
+                csrfToken.value = '{{ csrf_token }}';
+                form.appendChild(csrfToken);
+
+                // Add test type
+                const testType = document.createElement('input');
+                testType.type = 'hidden';
+                testType.name = 'test_type';
+                testType.value = this.getAttribute('data-test-type') || 'academic';
+                form.appendChild(testType);
+
+                // Add full-screen flag
+                const fullScreen = document.createElement('input');
+                fullScreen.type = 'hidden';
+                fullScreen.name = 'full_screen';
+                fullScreen.value = 'true';
+                form.appendChild(fullScreen);
+
+                // Append form to body
+                document.body.appendChild(form);
+
+                // Request full-screen mode
+                const docElm = document.documentElement;
+
+                if (docElm.requestFullscreen) {
+                    docElm.requestFullscreen().then(() => {
+                        // Submit the form after entering full-screen
+                        form.submit();
+                    }).catch(err => {
+                        console.error('Error attempting to enable full-screen mode:', err);
+                        // Submit anyway if full-screen fails
+                        form.submit();
+                    });
+                } else if (docElm.mozRequestFullScreen) { // Firefox
+                    docElm.mozRequestFullScreen();
+                    form.submit();
+                } else if (docElm.webkitRequestFullscreen) { // Chrome, Safari and Opera
+                    docElm.webkitRequestFullscreen();
+                    form.submit();
+                } else if (docElm.msRequestFullscreen) { // IE/Edge
+                    docElm.msRequestFullscreen();
+                    form.submit();
+                } else {
+                    // If full-screen is not supported, just submit the form
+                    form.submit();
+                }
+            });
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,1250 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block title %}IELTS Mock Test - Results{% endblock %}
+
+{% block extra_css %}
+    <style>
+        /* Modern, clean design for test results */
+        .results-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: #1e293b;
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #121927;
+            color: white;
+            padding: 1.5rem 2rem;
+        }
+
+        .results-header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .test-id {
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .results-nav {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .back-button {
+            display: flex;
+            align-items: center;
+            color: #1e293b;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            background-color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .back-button:hover {
+            background-color: #f8fafc;
+        }
+
+        .back-button svg {
+            margin-right: 0.5rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .action-button {
+            display: flex;
+            align-items: center;
+            color: #1e293b;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            background-color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .action-button:hover {
+            background-color: #f8fafc;
+        }
+
+        .action-button svg {
+            margin-right: 0.5rem;
+        }
+
+        .results-content {
+            padding: 2rem;
+        }
+
+        .results-main {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .overall-score {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .score-value {
+            font-size: 5rem;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+
+        .score-label {
+            font-size: 1.25rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .section-scores {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .section-score {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .section-name {
+            font-weight: 500;
+            font-size: 1.1rem;
+            width: 100px;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 8px;
+            background-color: #e2e8f0;
+            border-radius: 4px;
+            margin: 0 1rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: #2563eb;
+            border-radius: 4px;
+        }
+
+        .section-value {
+            font-weight: 700;
+            font-size: 1.1rem;
+            width: 30px;
+            text-align: right;
+        }
+
+        .interpretation {
+            background-color: #f8fafc;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .interpretation h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-top: 0;
+            margin-bottom: 1rem;
+        }
+
+        .interpretation p {
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        .strengths-weaknesses {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .strengths-card, .weaknesses-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-top: 0;
+            margin-bottom: 1.25rem;
+        }
+
+        .item-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .list-item {
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .list-item-icon {
+            margin-right: 0.75rem;
+            margin-top: 0.25rem;
+            flex-shrink: 0;
+        }
+
+        .list-item-icon.success {
+            color: #10b981;
+        }
+
+        .list-item-icon.error {
+            color: #ef4444;
+        }
+
+        .list-item-text {
+            line-height: 1.5;
+        }
+
+        .detailed-analysis-section {
+            margin-top: 2rem;
+        }
+
+        .improvement-plan {
+            background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            color: white;
+        }
+
+        .improvement-plan h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-top: 0;
+            margin-bottom: 0.75rem;
+        }
+
+        .improvement-plan p {
+            margin-bottom: 1.25rem;
+            opacity: 0.9;
+        }
+
+        .improvement-plan .btn {
+            background-color: white;
+            color: #2563eb;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            text-decoration: none;
+            display: inline-block;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .improvement-plan .btn:hover {
+            background-color: #f8fafc;
+            transform: translateY(-2px);
+        }
+
+        /* Section tabs */
+        .section-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 0.5rem;
+        }
+
+        .section-tab {
+            padding: 0.75rem 1.25rem;
+            border-radius: 6px 6px 0 0;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .section-tab.active {
+            background-color: #f1f5f9;
+            color: #2563eb;
+            font-weight: 600;
+        }
+
+        .section-tab:hover:not(.active) {
+            background-color: #f8fafc;
+        }
+
+        .section-content {
+            display: none;
+            padding: 1.5rem;
+            background-color: #fff;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 2rem;
+        }
+
+        .section-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .section-header {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-metrics {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+        }
+
+        .metric {
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-label {
+            font-size: 1rem;
+            color: #64748b;
+        }
+
+        .section-analysis {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .recommendations {
+            background-color: #f8fafc;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-top: 1.5rem;
+        }
+
+        .recommendations h3 {
+            display: flex;
+            align-items: center;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-top: 0;
+            margin-bottom: 1rem;
+        }
+
+        .recommendations h3 svg {
+            margin-right: 0.5rem;
+        }
+
+        .recommendations ul {
+            margin: 0;
+            padding-left: 1.5rem;
+        }
+
+        .recommendations li {
+            margin-bottom: 0.75rem;
+            line-height: 1.5;
+        }
+
+        .recommendations li:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .results-main {
+                grid-template-columns: 1fr;
+            }
+
+            .strengths-weaknesses {
+                grid-template-columns: 1fr;
+            }
+
+            .results-nav {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .action-buttons {
+                justify-content: space-between;
+            }
+
+            .section-metrics {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+
+            .section-analysis {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Download functionality */
+        @media print {
+            .results-nav, .improvement-plan .btn, .section-tabs {
+                display: none;
+            }
+
+            .results-container {
+                box-shadow: none;
+            }
+
+            .section-content {
+                display: block;
+                border: none;
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Additional styles for the improvement plan */
+        .answers-review {
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .answers-review h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #0f172a;
+        }
+
+        .section-answers {
+            background-color: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-answers h4 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #0f172a;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .answers-table {
+            overflow-x: auto;
+        }
+
+        .answers-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .answers-table th {
+            background-color: #f8fafc;
+            padding: 0.75rem 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: #475569;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .answers-table td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .answers-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .correct-answer {
+            background-color: rgba(16, 185, 129, 0.1);
+        }
+
+        .incorrect-answer {
+            background-color: rgba(239, 68, 68, 0.1);
+        }
+
+        .correct-icon {
+            color: #10b981;
+        }
+
+        .incorrect-icon {
+            color: #ef4444;
+        }
+
+        .writing-answers {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .writing-task {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .writing-task h5 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #0f172a;
+        }
+
+        .writing-prompt, .writing-response {
+            margin-bottom: 1.5rem;
+        }
+
+        .writing-prompt strong, .writing-response strong {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #475569;
+        }
+
+        .response-text {
+            background-color: #f8fafc;
+            padding: 1rem;
+            border-radius: 6px;
+            white-space: pre-wrap;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            .writing-answers {
+                flex-direction: column;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="results-container">
+        <div class="results-nav">
+            <a href="{% url 'dashboard' %}" class="back-button">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 12H5"></path>
+                    <path d="M12 19l-7-7 7-7"></path>
+                </svg>
+                Back to Dashboard
+            </a>
+            <div class="action-buttons">
+                <a href="{% url 'download_results' test_id=test.id %}" class="action-button" id="download-results">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    Download Results
+                </a>
+                <button class="action-button" id="share-results">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="18" cy="5" r="3"></circle>
+                        <circle cx="6" cy="12" r="3"></circle>
+                        <circle cx="18" cy="19" r="3"></circle>
+                        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                    </svg>
+                    Share Results
+                </button>
+            </div>
+        </div>
+
+        <div class="results-header">
+            <h1>IELTS Mock Test Results</h1>
+            <div class="test-id">Test ID: {{ test.id|truncatechars:8 }}</div>
+        </div>
+
+        <div class="results-content">
+            <div class="results-main">
+                <div class="overall-score">
+                    <div class="score-value">{{ test.overall_score }}</div>
+                    <div class="score-label">Overall Band Score</div>
+                </div>
+
+                <div class="section-scores">
+                    <div class="section-score">
+                        <div class="section-name">Reading</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: {{ test.reading_score|divide:9|multiply:100 }}%;"></div>
+                        </div>
+                        <div class="section-value">{{ test.reading_score }}</div>
+                    </div>
+
+                    <div class="section-score">
+                        <div class="section-name">Listening</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: {{ test.listening_score|divide:9|multiply:100 }}%;"></div>
+                        </div>
+                        <div class="section-value">{{ test.listening_score }}</div>
+                    </div>
+
+                    <div class="section-score">
+                        <div class="section-name">Writing</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: {{ test.writing_score|divide:9|multiply:100 }}%;"></div>
+                        </div>
+                        <div class="section-value">{{ test.writing_score }}</div>
+                    </div>
+
+                    <div class="section-score">
+                        <div class="section-name">Speaking</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: {{ test.speaking_score|divide:9|multiply:100 }}%;"></div>
+                        </div>
+                        <div class="section-value">{{ test.speaking_score }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="interpretation">
+                <h2>Score Interpretation</h2>
+                <p>{{ score_interpretation }}</p>
+            </div>
+
+            <!-- Section Tabs -->
+            <div class="section-tabs">
+                <div class="section-tab active" data-section="reading">Reading</div>
+                <div class="section-tab" data-section="listening">Listening</div>
+                <div class="section-tab" data-section="writing">Writing</div>
+                <div class="section-tab" data-section="speaking">Speaking</div>
+            </div>
+
+            <!-- Reading Section Content -->
+            <div class="section-content active" id="reading-section">
+                <h2 class="section-header">Reading Performance</h2>
+
+                <div class="section-metrics">
+                    <div class="metric">
+                        <div class="metric-value">{{ test.reading_score }}</div>
+                        <div class="metric-label">Band Score</div>
+                    </div>
+
+                    {% if reading_analysis.total_questions and reading_analysis.correct_answers %}
+                        <div class="metric">
+                            <div class="metric-value">{{ reading_analysis.correct_answers }}/{{ reading_analysis.total_questions }}</div>
+                            <div class="metric-label">Correct Answers</div>
+                        </div>
+
+                        <div class="metric">
+                            <div class="metric-value">{{ reading_analysis.correct_answers|divide:reading_analysis.total_questions|multiply:100|floatformat:0 }}%</div>
+                            <div class="metric-label">Accuracy</div>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="section-analysis">
+                    <div>
+                        <h3>Strengths</h3>
+                        <div class="item-list">
+                            {% if reading_analysis.strengths %}
+                                {% for strength in reading_analysis.strengths %}
+                                    <div class="list-item">
+                                        <div class="list-item-icon success">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                            </svg>
+                                        </div>
+                                        <div class="list-item-text">{{ strength }}</div>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="list-item">
+                                    <div class="list-item-text">No specific strengths identified.</div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3>Areas for Improvement</h3>
+                        <div class="item-list">
+                            {% if reading_analysis.weaknesses %}
+                                {% for weakness in reading_analysis.weaknesses %}
+                                    <div class="list-item">
+                                        <div class="list-item-icon error">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <circle cx="12" cy="12" r="10"></circle>
+                                                <line x1="15" y1="9" x2="9" y2="15"></line>
+                                                <line x1="9" y1="9" x2="15" y2="15"></line>
+                                            </svg>
+                                        </div>
+                                        <div class="list-item-text">{{ weakness }}</div>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="list-item">
+                                    <div class="list-item-text">No specific areas for improvement identified.</div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="recommendations">
+                    <h3>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                        Recommendations
+                    </h3>
+                    <ul>
+                        {% if improvement_plan.reading %}
+                            {% for recommendation in improvement_plan.reading %}
+                                {% for activity in recommendation.activities %}
+                                    <li>{{ activity }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                        {% else %}
+                            <li>Practice True/False/Not Given questions with a focus on identifying information that is implied rather than stated.</li>
+                            <li>Work on improving your reading speed by setting time limits for practice tests.</li>
+                            <li>Develop skimming and scanning techniques to quickly locate specific information.</li>
+                            <li>Expand your vocabulary, especially academic and topic-specific words.</li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Listening Section Content -->
+            <div class="section-content" id="listening-section">
+                <h2 class="section-header">Listening Performance</h2>
+
+                <div class="section-metrics">
+                    <div class="metric">
+                        <div class="metric-value">{{ test.listening_score }}</div>
+                        <div class="metric-label">Band Score</div>
+                    </div>
+
+                    {% if listening_analysis.total_questions and listening_analysis.correct_answers %}
+                        <div class="metric">
+                            <div class="metric-value">{{ listening_analysis.correct_answers }}/{{ listening_analysis.total_questions }}</div>
+                            <div class="metric-label">Correct Answers</div>
+                        </div>
+
+                        <div class="metric">
+                            <div class="metric-value">{{ listening_analysis.correct_answers|divide:listening_analysis.total_questions|multiply:100|floatformat:0 }}%</div>
+                            <div class="metric-label">Accuracy</div>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="section-analysis">
+                    <div>
+                        <h3>Strengths</h3>
+                        <div class="item-list">
+                            {% if listening_analysis.strengths %}
+                                {% for strength in listening_analysis.strengths %}
+                                    <div class="list-item">
+                                        <div class="list-item-icon success">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                            </svg>
+                                        </div>
+                                        <div class="list-item-text">{{ strength }}</div>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="list-item">
+                                    <div class="list-item-text">No specific strengths identified.</div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3>Areas for Improvement</h3>
+                        <div class="item-list">
+                            {% if listening_analysis.weaknesses %}
+                                {% for weakness in listening_analysis.weaknesses %}
+                                    <div class="list-item">
+                                        <div class="list-item-icon error">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <circle cx="12" cy="12" r="10"></circle>
+                                                <line x1="15" y1="9" x2="9" y2="15"></line>
+                                                <line x1="9" y1="9" x2="15" y2="15"></line>
+                                            </svg>
+                                        </div>
+                                        <div class="list-item-text">{{ weakness }}</div>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="list-item">
+                                    <div class="list-item-text">No specific areas for improvement identified.</div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="recommendations">
+                    <h3>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                        Recommendations
+                    </h3>
+                    <ul>
+                        {% if improvement_plan.listening %}
+                            {% for recommendation in improvement_plan.listening %}
+                                {% for activity in recommendation.activities %}
+                                    <li>{{ activity }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                        {% else %}
+                            <li>Practice listening to a variety of accents (British, American, Australian).</li>
+                            <li>Improve note-taking skills during listening exercises.</li>
+                            <li>Focus on identifying specific details like numbers, dates, and names.</li>
+                            <li>Practice predicting answers before listening to the audio.</li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Writing Section Content -->
+            <div class="section-content" id="writing-section">
+                <h2 class="section-header">Writing Performance</h2>
+
+                <div class="section-metrics">
+                    <div class="metric">
+                        <div class="metric-value">{{ test.writing_score }}</div>
+                        <div class="metric-label">Band Score</div>
+                    </div>
+
+                    {% if writing_analysis.task1 and writing_analysis.task2 %}
+                        <div class="metric">
+                            <div class="metric-value">{{ writing_analysis.task1.overall_score }}</div>
+                            <div class="metric-label">Task 1 Score</div>
+                        </div>
+
+                        <div class="metric">
+                            <div class="metric-value">{{ writing_analysis.task2.overall_score }}</div>
+                            <div class="metric-label">Task 2 Score</div>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="section-analysis">
+                    <div>
+                        <h3>Strengths</h3>
+                        <div class="item-list">
+                            {% if writing_analysis.strengths %}
+                                {% for strength in writing_analysis.strengths %}
+                                    <div class="list-item">
+                                        <div class="list-item-icon success">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                            </svg>
+                                        </div>
+                                        <div class="list-item-text">{{ strength }}</div>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="list-item">
+                                    <div class="list-item-text">No specific strengths identified.</div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3>Areas for Improvement</h3>
+                        <div class="item-list">
+                            {% if writing_analysis.weaknesses %}
+                                {% for weakness in writing_analysis.weaknesses %}
+                                    <div class="list-item">
+                                        <div class="list-item-icon error">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <circle cx="12" cy="12" r="10"></circle>
+                                                <line x1="15" y1="9" x2="9" y2="15"></line>
+                                                <line x1="9" y1="9" x2="15" y2="15"></line>
+                                            </svg>
+                                        </div>
+                                        <div class="list-item-text">{{ weakness }}</div>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="list-item">
+                                    <div class="list-item-text">No specific areas for improvement identified.</div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="recommendations">
+                    <h3>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                        Recommendations
+                    </h3>
+                    <ul>
+                        {% if improvement_plan.writing %}
+                            {% for recommendation in improvement_plan.writing %}
+                                {% for activity in recommendation.activities %}
+                                    <li>{{ activity }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                        {% else %}
+                            <li>Practice organizing your essays with clear introductions, body paragraphs, and conclusions.</li>
+                            <li>Expand your vocabulary with academic and formal expressions.</li>
+                            <li>Work on grammar accuracy, especially complex sentence structures.</li>
+                            <li>Practice analyzing and describing visual information for Task 1.</li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Speaking Section Content -->
+            <div class="section-content" id="speaking-section">
+                <h2 class="section-header">Speaking Performance</h2>
+
+                <div class="section-metrics">
+                    <div class="metric">
+                        <div class="metric-value">{{ test.speaking_score }}</div>
+                        <div class="metric-label">Band Score</div>
+                    </div>
+                </div>
+
+                <div class="section-analysis">
+                    <div>
+                        <h3>Strengths</h3>
+                        <div class="item-list">
+                            {% if test.speaking_score >= 7.0 %}
+                                <div class="list-item">
+                                    <div class="list-item-icon success">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                        </svg>
+                                    </div>
+                                    <div class="list-item-text">Fluent delivery in speaking</div>
+                                </div>
+                                <div class="list-item">
+                                    <div class="list-item-icon success">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                        </svg>
+                                    </div>
+                                    <div class="list-item-text">Good range of vocabulary</div>
+                                </div>
+                            {% elif test.speaking_score >= 6.0 %}
+                                <div class="list-item">
+                                    <div class="list-item-icon success">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                        </svg>
+                                    </div>
+                                    <div class="list-item-text">Able to communicate effectively</div>
+                                </div>
+                            {% else %}
+                                <div class="list-item">
+                                    <div class="list-item-text">No specific strengths identified.</div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3>Areas for Improvement</h3>
+                        <div class="item-list">
+                            {% if test.speaking_score <= 5.5 %}
+                                <div class="list-item">
+                                    <div class="list-item-icon error">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <line x1="15" y1="9" x2="9" y2="15"></line>
+                                            <line x1="9" y1="9" x2="15" y2="15"></line>
+                                        </svg>
+                                    </div>
+                                    <div class="list-item-text">Pronunciation issues in speaking</div>
+                                </div>
+                                <div class="list-item">
+                                    <div class="list-item-icon error">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <line x1="15" y1="9" x2="9" y2="15"></line>
+                                            <line x1="9" y1="9" x2="15" y2="15"></line>
+                                        </svg>
+                                    </div>
+                                    <div class="list-item-text">Limited vocabulary range</div>
+                                </div>
+                            {% elif test.speaking_score <= 6.5 %}
+                                <div class="list-item">
+                                    <div class="list-item-icon error">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <line x1="15" y1="9" x2="9" y2="15"></line>
+                                            <line x1="9" y1="9" x2="15" y2="15"></line>
+                                        </svg>
+                                    </div>
+                                    <div class="list-item-text">Hesitation in speaking</div>
+                                </div>
+                            {% else %}
+                                <div class="list-item">
+                                    <div class="list-item-text">No significant areas for improvement identified.</div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="recommendations">
+                    <h3>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                        Recommendations
+                    </h3>
+                    <ul>
+                        {% if improvement_plan.speaking %}
+                            {% for recommendation in improvement_plan.speaking %}
+                                {% for activity in recommendation.activities %}
+                                    <li>{{ activity }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                        {% else %}
+                            <li>Practice speaking English daily, even if just for a few minutes.</li>
+                            <li>Record yourself speaking and listen for areas to improve.</li>
+                            <li>Work on pronunciation of difficult sounds.</li>
+                            <li>Expand your vocabulary for common IELTS speaking topics.</li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+
+            <div class="improvement-plan">
+                <h2>Your Personalized Improvement Plan</h2>
+                <p>Based on your test results, we've created a personalized improvement plan to help you achieve your target score.</p>
+
+                <!-- User Answers and Correct Answers Section -->
+                <div class="answers-review">
+                    <h3>Review Your Answers</h3>
+
+                    <!-- Reading Section Answers -->
+                    <div class="section-answers">
+                        <h4>Reading Section</h4>
+                        <div class="answers-table">
+                            <table class="table table-striped">
+                                <thead>
+                                <tr>
+                                    <th>Question</th>
+                                    <th>Your Answer</th>
+                                    <th>Correct Answer</th>
+                                    <th>Result</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for question in reading_questions %}
+                                    <tr class="{% if question.is_correct %}correct-answer{% else %}incorrect-answer{% endif %}">
+                                        <td>{{ question.section_number }}.{{ question.question_number }}</td>
+                                        <td>{{ question.user_answer|default:"No answer" }}</td>
+                                        <td>{{ question.correct_answer }}</td>
+                                        <td>
+                                            {% if question.is_correct %}
+                                                <span class="correct-icon">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                            </svg>
+                                        </span>
+                                            {% else %}
+                                                <span class="incorrect-icon">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <circle cx="12" cy="12" r="10"></circle>
+                                                <line x1="15" y1="9" x2="9" y2="15"></line>
+                                                <line x1="9" y1="9" x2="15" y2="15"></line>
+                                            </svg>
+                                        </span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="4">No reading questions available</td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Listening Section Answers -->
+                    <div class="section-answers">
+                        <h4>Listening Section</h4>
+                        <div class="answers-table">
+                            <table class="table table-striped">
+                                <thead>
+                                <tr>
+                                    <th>Question</th>
+                                    <th>Your Answer</th>
+                                    <th>Correct Answer</th>
+                                    <th>Result</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for question in listening_questions %}
+                                    <tr class="{% if question.is_correct %}correct-answer{% else %}incorrect-answer{% endif %}">
+                                        <td>{{ question.section_number }}.{{ question.question_number }}</td>
+                                        <td>{{ question.user_answer|default:"No answer" }}</td>
+                                        <td>{{ question.correct_answer }}</td>
+                                        <td>
+                                            {% if question.is_correct %}
+                                                <span class="correct-icon">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                            </svg>
+                                        </span>
+                                            {% else %}
+                                                <span class="incorrect-icon">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <circle cx="12" cy="12" r="10"></circle>
+                                                <line x1="15" y1="9" x2="9" y2="15"></line>
+                                                <line x1="9" y1="9" x2="15" y2="15"></line>
+                                            </svg>
+                                        </span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="4">No listening questions available</td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Writing Section Answers -->
+                    <div class="section-answers">
+                        <h4>Writing Section</h4>
+                        <div class="writing-answers">
+                            <div class="writing-task">
+                                <h5>Task 1</h5>
+                                <div class="writing-prompt">
+                                    <strong>Prompt:</strong>
+                                    <p>{{ test.get_writing_content.task1.instructions|default:"No prompt available" }}</p>
+                                </div>
+                                <div class="writing-response">
+                                    <strong>Your Response:</strong>
+                                    <p class="response-text">{{ test.get_writing_responses.task1|default:"No response provided"|linebreaks }}</p>
+                                </div>
+                            </div>
+
+                            <div class="writing-task">
+                                <h5>Task 2</h5>
+                                <div class="writing-prompt">
+                                    <strong>Prompt:</strong>
+                                    <p>{{ test.get_writing_content.task2.instructions|default:"No prompt available" }}</p>
+                                </div>
+                                <div class="writing-response">
+                                    <strong>Your Response:</strong>
+                                    <p class="response-text">{{ test.get_writing_responses.task2|default:"No response provided"|linebreaks }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <a href="{% url 'improvement_plan' test_id=test.id %}" class="btn">View Detailed Improvement Plan</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Section tabs functionality
+            const sectionTabs = document.querySelectorAll('.section-tab');
+            const sectionContents = document.querySelectorAll('.section-content');
+
+            sectionTabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const sectionId = this.getAttribute('data-section');
+
+                    // Remove active class from all tabs and contents
+                    sectionTabs.forEach(t => t.classList.remove('active'));
+                    sectionContents.forEach(c => c.classList.remove('active'));
+
+                    // Add active class to current tab and content
+                    this.classList.add('active');
+                    document.getElementById(`${sectionId}-section`).classList.add('active');
+                });
+            });
+
+            // Share functionality
+            document.getElementById('share-results').addEventListener('click', function() {
+                // Create a shareable link
+                const shareUrl = window.location.href;
+
+                // Check if Web Share API is available
+                if (navigator.share) {
+                    navigator.share({
+                        title: 'My IELTS Test Results',
+                        text: 'Check out my IELTS test results!',
+                        url: shareUrl,
+                    }).catch(console.error);
+                } else {
+                    // Fallback: copy to clipboard
+                    navigator.clipboard.writeText(shareUrl).then(function() {
+                        alert('Link copied to clipboard!');
+                    }).catch(function() {
+                        // If clipboard API fails, show the URL in a prompt
+                        prompt('Copy this link to share your results:', shareUrl);
+                    });
+                }
+            });
+        });
+    </script>
+{% endblock %}

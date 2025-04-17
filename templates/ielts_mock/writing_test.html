@@ -1,0 +1,557 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}IELTS Writing Test - BandBooster{% endblock %}
+
+{% block extra_css %}
+    <style>
+        body {
+            background-color: #f8fafc;
+            margin: 0;
+            padding: 0;
+        }
+
+        .test-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        .test-header {
+            background-color: #1e293b;
+            color: white;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .test-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .test-timer {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .timer-icon {
+            width: 18px;
+            height: 18px;
+        }
+
+        .timer-text {
+            font-weight: 600;
+        }
+
+        .test-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .task-section {
+            margin-bottom: 2rem;
+        }
+
+        .task-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #1e293b;
+        }
+
+        .task-description {
+            color: #334155;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .task-prompt {
+            background-color: #f1f5f9;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+
+        .task-prompt p {
+            margin: 0 0 1rem;
+            color: #334155;
+        }
+
+        .task-prompt p:last-child {
+            margin-bottom: 0;
+        }
+
+        .word-count {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+            color: #64748b;
+        }
+
+        .word-count-label {
+            font-weight: 500;
+        }
+
+        .word-count-value {
+            background-color: #f1f5f9;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+        }
+
+        .essay-textarea {
+            width: 100%;
+            min-height: 300px;
+            padding: 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            line-height: 1.6;
+            resize: vertical;
+            transition: border-color 0.2s;
+        }
+
+        .essay-textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+        }
+
+        .test-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .nav-button {
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .prev-button {
+            background-color: white;
+            color: #1e293b;
+            border: 1px solid #e2e8f0;
+        }
+
+        .prev-button:hover {
+            background-color: #f8fafc;
+        }
+
+        .next-button {
+            background-color: #1e293b;
+            color: white;
+            border: none;
+        }
+
+        .next-button:hover {
+            background-color: #0f172a;
+        }
+
+        .button-icon {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Progress bar */
+        .progress-container {
+            width: 100%;
+            background-color: #e2e8f0;
+            border-radius: 4px;
+            margin: 1rem 0;
+            height: 8px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: #3b82f6;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        /* Task tabs */
+        .task-tabs {
+            display: flex;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .task-tab {
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            color: #64748b;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .task-tab.active {
+            color: #3b82f6;
+            border-bottom-color: #3b82f6;
+        }
+
+        .task-tab:hover:not(.active) {
+            color: #1e293b;
+            background-color: #f8fafc;
+        }
+
+        .task-content {
+            display: none;
+        }
+
+        .task-content.active {
+            display: block;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            .test-container {
+                padding: 0.5rem;
+            }
+
+            .test-content {
+                padding: 1rem;
+            }
+
+            .test-header {
+                flex-direction: column;
+                gap: 0.5rem;
+                align-items: flex-start;
+            }
+
+            .test-timer {
+                align-self: flex-end;
+            }
+
+            .task-tabs {
+                flex-direction: column;
+                border-bottom: none;
+            }
+
+            .task-tab {
+                border-bottom: none;
+                border-left: 2px solid transparent;
+                padding: 0.5rem 1rem;
+            }
+
+            .task-tab.active {
+                border-bottom-color: transparent;
+                border-left-color: #3b82f6;
+                background-color: #f1f5f9;
+            }
+        }
+
+        /* Loading overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid rgba(37, 99, 235, 0.2);
+            border-radius: 50%;
+            border-top-color: var(--primary-color, #3b82f6);
+            animation: spin 1s linear infinite;
+            margin-bottom: 1.5rem;
+        }
+
+        .loading-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+        }
+
+        .loading-subtext {
+            font-size: 0.95rem;
+            color: #64748b;
+            text-align: center;
+            max-width: 400px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="test-container">
+        <div class="test-header">
+            <div class="test-title">IELTS Writing Test</div>
+            <div class="test-timer">
+                <svg class="timer-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                <span class="timer-text" id="timer">60:00</span>
+            </div>
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-bar" style="width: 0%"></div>
+        </div>
+
+        <div class="test-content">
+            <div class="task-tabs">
+                <div class="task-tab active" data-task="task1">Task 1</div>
+                <div class="task-tab" data-task="task2">Task 2</div>
+            </div>
+
+            <form id="writing-test-form" method="post" action="{% url 'submit_writing' test_id=test.id %}">
+                {% csrf_token %}
+
+                <div class="task-content active" id="task1-content">
+                    <div class="task-section">
+                        <h2 class="task-title">Task 1</h2>
+                        <div class="task-description">
+                            <p>You should spend about 20 minutes on this task.</p>
+                        </div>
+
+                        <div class="task-prompt">
+                            {{ writing_content.task1.instructions|safe }}
+                        </div>
+
+                        <div class="word-count">
+                            <span class="word-count-label">Word Count:</span>
+                            <span class="word-count-value" id="task1-word-count">0 words</span>
+                        </div>
+
+                        <textarea class="essay-textarea" id="task1-essay" name="task1_response" placeholder="Write your response here..."></textarea>
+                    </div>
+                </div>
+
+                <div class="task-content" id="task2-content">
+                    <div class="task-section">
+                        <h2 class="task-title">Task 2</h2>
+                        <div class="task-description">
+                            <p>You should spend about 40 minutes on this task.</p>
+                        </div>
+
+                        <div class="task-prompt">
+                            {{ writing_content.task2.instructions|safe }}
+                        </div>
+
+                        <div class="word-count">
+                            <span class="word-count-label">Word Count:</span>
+                            <span class="word-count-value" id="task2-word-count">0 words</span>
+                        </div>
+
+                        <textarea class="essay-textarea" id="task2-essay" name="task2_response" placeholder="Write your response here..."></textarea>
+                    </div>
+                </div>
+
+                <div class="test-navigation">
+                    <button type="button" class="nav-button prev-button" id="prev-section-btn">
+                        <svg class="button-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="19" y1="12" x2="5" y2="12"></line>
+                            <polyline points="12 19 5 12 12 5"></polyline>
+                        </svg>
+                        Previous Section
+                    </button>
+
+                    <button type="submit" class="nav-button next-button" id="next-section-btn">
+                        Submit Test
+                        <svg class="button-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Loading overlay -->
+    <div class="loading-overlay" id="loading-overlay" style="display: none;">
+        <div class="spinner"></div>
+        <div class="loading-text">Submitting Your Essays</div>
+        <div class="loading-subtext">Please wait while we process your writing. This may take a few moments as our AI evaluates your responses...</div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Task tabs functionality
+            const taskTabs = document.querySelectorAll('.task-tab');
+            const taskContents = document.querySelectorAll('.task-content');
+
+            taskTabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const taskId = this.getAttribute('data-task');
+
+                    // Update active tab
+                    taskTabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+
+                    // Show corresponding content
+                    taskContents.forEach(content => {
+                        content.classList.remove('active');
+                        if (content.id === `${taskId}-content`) {
+                            content.classList.add('active');
+                        }
+                    });
+                });
+            });
+
+            // Word count functionality
+            const task1Essay = document.getElementById('task1-essay');
+            const task2Essay = document.getElementById('task2-essay');
+            const task1WordCount = document.getElementById('task1-word-count');
+            const task2WordCount = document.getElementById('task2-word-count');
+
+            function countWords(text) {
+                return text.trim().split(/\s+/).filter(word => word.length > 0).length;
+            }
+
+            function updateWordCount(textarea, countElement) {
+                const words = countWords(textarea.value);
+                countElement.textContent = `${words} words`;
+
+                // Update progress based on word count
+                updateProgress();
+            }
+
+            task1Essay.addEventListener('input', function() {
+                updateWordCount(this, task1WordCount);
+            });
+
+            task2Essay.addEventListener('input', function() {
+                updateWordCount(this, task2WordCount);
+            });
+
+            // Timer functionality
+            let timeLeft = 60 * 60; // 60 minutes in seconds
+            const timerElement = document.getElementById('timer');
+
+            function updateTimer() {
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+
+                timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    document.getElementById('writing-test-form').submit();
+                }
+
+                timeLeft--;
+            }
+
+            const timerInterval = setInterval(updateTimer, 1000);
+            updateTimer();
+
+            // Progress tracking
+            const progressBar = document.querySelector('.progress-bar');
+
+            function updateProgress() {
+                const task1Words = countWords(task1Essay.value);
+                const task2Words = countWords(task2Essay.value);
+
+                // Target word counts
+                const task1Target = 150; // Minimum recommended for Task 1
+                const task2Target = 250; // Minimum recommended for Task 2
+
+                // Calculate progress percentages (cap at 100%)
+                const task1Progress = Math.min(task1Words / task1Target, 1) * 0.4; // Task 1 is 40% of total
+                const task2Progress = Math.min(task2Words / task2Target, 1) * 0.6; // Task 2 is 60% of total
+
+                // Update progress bar
+                const totalProgress = (task1Progress + task2Progress) * 100;
+                progressBar.style.width = `${totalProgress}%`;
+            }
+
+            // Form submission
+            const form = document.getElementById('writing-test-form');
+            const loadingOverlay = document.getElementById('loading-overlay');
+
+            form.addEventListener('submit', function(e) {
+                // Validate that both tasks have some content
+                const task1Words = countWords(task1Essay.value);
+                const task2Words = countWords(task2Essay.value);
+
+                if (task1Words < 10 || task2Words < 10) {
+                    e.preventDefault();
+                    alert('Please write responses for both Task 1 and Task 2 before submitting.');
+                    return;
+                }
+
+                loadingOverlay.style.display = 'flex';
+            });
+
+            // Previous section button
+            const prevSectionBtn = document.getElementById('prev-section-btn');
+            prevSectionBtn.addEventListener('click', function() {
+                if (confirm('Are you sure you want to go back to the previous section? Your progress in this section will be lost.')) {
+                    window.history.back();
+                }
+            });
+
+            // Auto-save functionality
+            function saveProgress() {
+                localStorage.setItem('task1Essay', task1Essay.value);
+                localStorage.setItem('task2Essay', task2Essay.value);
+            }
+
+            // Save every 30 seconds
+            setInterval(saveProgress, 30000);
+
+            // Save on tab change
+            taskTabs.forEach(tab => {
+                tab.addEventListener('click', saveProgress);
+            });
+
+            // Load saved progress if available
+            const savedTask1 = localStorage.getItem('task1Essay');
+            const savedTask2 = localStorage.getItem('task2Essay');
+
+            if (savedTask1) {
+                task1Essay.value = savedTask1;
+                updateWordCount(task1Essay, task1WordCount);
+            }
+
+            if (savedTask2) {
+                task2Essay.value = savedTask2;
+                updateWordCount(task2Essay, task2WordCount);
+            }
+
+            // Clear saved progress on form submission
+            form.addEventListener('submit', function() {
+                localStorage.removeItem('task1Essay');
+                localStorage.removeItem('task2Essay');
+            });
+        });
+    </script>
+{% endblock %}

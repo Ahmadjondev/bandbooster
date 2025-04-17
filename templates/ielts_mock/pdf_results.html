@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>IELTS Test Results - {{ test.id|truncatechars:8 }}</title>
+    <style>
+        @page {
+            size: a4 portrait;
+            margin: 2cm;
+        }
+
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #1e293b;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Header styling */
+        .pdf-header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #2563eb;
+            padding-bottom: 20px;
+        }
+
+        .pdf-header .logo {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .pdf-header h1 {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0;
+            color: #2563eb;
+        }
+
+        .pdf-header .subtitle {
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        /* Test info section */
+        .test-info {
+            margin-bottom: 30px;
+            padding: 15px;
+            background-color: #f8fafc;
+            border-radius: 8px;
+        }
+
+        .test-info-row {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .test-info-label {
+            font-size: 12px;
+            color: #64748b;
+            display: block;
+        }
+
+        .test-info-value {
+            font-size: 14px;
+            font-weight: bold;
+            display: block;
+        }
+
+        /* Overall score styling */
+        .overall-score-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .overall-score-value {
+            font-size: 60px;
+            font-weight: bold;
+            color: #2563eb;
+            line-height: 1;
+        }
+
+        .overall-score-label {
+            font-size: 16px;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        /* Section scores styling */
+        .section-scores {
+            margin-bottom: 30px;
+        }
+
+        .section-score {
+            margin-bottom: 15px;
+        }
+
+        .section-name {
+            font-weight: bold;
+            display: inline-block;
+            width: 100px;
+        }
+
+        .progress-container {
+            display: inline-block;
+            width: 60%;
+            height: 8px;
+            background-color: #e2e8f0;
+            border-radius: 4px;
+            margin: 0 15px;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: #2563eb;
+            border-radius: 4px;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .section-value {
+            font-weight: bold;
+            display: inline-block;
+            width: 30px;
+            text-align: right;
+        }
+
+        /* Section analysis styling */
+        .section-analysis-header {
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            color: #2563eb;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 10px;
+        }
+
+        .analysis-grid {
+            margin-bottom: 30px;
+        }
+
+        .analysis-column {
+            width: 48%;
+            display: inline-block;
+            vertical-align: top;
+        }
+
+        .analysis-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .analysis-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .analysis-item {
+            margin-bottom: 10px;
+        }
+
+        .analysis-icon {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            margin-right: 10px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 16px;
+            font-weight: bold;
+            font-size: 10px;
+        }
+
+        .success-icon {
+            background-color: #10b981;
+            color: white;
+        }
+
+        .error-icon {
+            background-color: #ef4444;
+            color: white;
+        }
+
+        .recommendations {
+            background-color: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+
+        .recommendations h3 {
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+
+        .recommendations-list {
+            padding-left: 20px;
+            margin: 0;
+        }
+
+        .recommendations-list li {
+            margin-bottom: 8px;
+        }
+
+        /* Footer styling */
+        .pdf-footer {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+            color: #64748b;
+            font-size: 12px;
+        }
+
+        /* Page break utilities */
+        .page-break {
+            page-break-after: always;
+        }
+
+        /* Helper classes */
+        .text-center {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<!-- Header -->
+<div class="pdf-header">
+    <div class="logo">
+        <img src="{{ logo_path }}" alt="BandBooster" height="40">
+    </div>
+    <h1>IELTS Mock Test Results</h1>
+    <div class="subtitle">Test ID: {{ test.id|truncatechars:8 }}</div>
+</div>
+
+<!-- Test Information -->
+<div class="test-info">
+    <div class="test-info-row">
+        <span class="test-info-label">Test Type</span>
+        <span class="test-info-value">{{ test.test_type|title }}</span>
+    </div>
+    <div class="test-info-row">
+        <span class="test-info-label">Date Completed</span>
+        <span class="test-info-value">{{ test.completed_at|date:"F j, Y" }}</span>
+    </div>
+    <div class="test-info-row">
+        <span class="test-info-label">Candidate</span>
+        <span class="test-info-value">{{ test.user.get_full_name|default:test.user.username }}</span>
+    </div>
+</div>
+
+<!-- Overall Score -->
+<div class="overall-score-section">
+    <div class="overall-score-value">{{ test.overall_score }}</div>
+    <div class="overall-score-label">Overall Band Score</div>
+</div>
+
+<!-- Section Scores -->
+<div class="section-scores">
+    <div class="section-score">
+        <div class="section-name">Reading</div>
+        <div class="progress-container">
+            <div class="progress-fill" style="width: {% widthratio test.reading_score 9 100 %}%;"></div>
+        </div>
+        <div class="section-value">{{ test.reading_score }}</div>
+    </div>
+
+    <div class="section-score">
+        <div class="section-name">Listening</div>
+        <div class="progress-container">
+            <div class="progress-fill" style="width: {% widthratio test.listening_score 9 100 %}%;"></div>
+        </div>
+        <div class="section-value">{{ test.listening_score }}</div>
+    </div>
+
+    <div class="section-score">
+        <div class="section-name">Writing</div>
+        <div class="progress-container">
+            <div class="progress-fill" style="width: {% widthratio test.writing_score 9 100 %}%;"></div>
+        </div>
+        <div class="section-value">{{ test.writing_score }}</div>
+    </div>
+
+    <div class="section-score">
+        <div class="section-name">Speaking</div>
+        <div class="progress-container">
+            <div class="progress-fill" style="width: {% widthratio test.speaking_score 9 100 %}%;"></div>
+        </div>
+        <div class="section-value">{{ test.speaking_score }}</div>
+    </div>
+</div>
+
+<!-- Score Interpretation -->
+<div class="recommendations">
+    <h3>Score Interpretation</h3>
+    <p>{{ score_interpretation }}</p>
+</div>
+
+<!-- Reading Analysis -->
+<div class="section-analysis-header">Reading Analysis</div>
+
+<div class="analysis-grid">
+    <div class="analysis-column">
+        <div class="analysis-title">Strengths</div>
+        <ul class="analysis-list">
+            {% if reading_analysis.strengths %}
+                {% for strength in reading_analysis.strengths %}
+                    <li class="analysis-item">
+                        <span class="analysis-icon success-icon">✓</span>
+                        <span>{{ strength }}</span>
+                    </li>
+                {% endfor %}
+            {% else %}
+                <li class="analysis-item">
+                    <span>No specific strengths identified.</span>
+                </li>
+            {% endif %}
+        </ul>
+    </div>
+
+    <div class="analysis-column">
+        <div class="analysis-title">Areas for Improvement</div>
+        <ul class="analysis-list">
+            {% if reading_analysis.weaknesses %}
+                {% for weakness in reading_analysis.weaknesses %}
+                    <li class="analysis-item">
+                        <span class="analysis-icon error-icon">✗</span>
+                        <span>{{ weakness }}</span>
+                    </li>
+                {% endfor %}
+            {% else %}
+                <li class="analysis-item">
+                    <span>No specific areas for improvement identified.</span>
+                </li>
+            {% endif %}
+        </ul>
+    </div>
+</div>
+
+<div class="recommendations">
+    <h3>Recommendations</h3>
+    <ul class="recommendations-list">
+        {% if improvement_plan.reading %}
+            {% for recommendation in improvement_plan.reading %}
+                {% for activity in recommendation.activities %}
+                    <li>{{ activity }}</li>
+                {% endfor %}
+            {% endfor %}
+        {% else %}
+            <li>Practice True/False/Not Given questions with a focus on identifying information that is implied rather than stated.</li>
+            <li>Work on improving your reading speed by setting time limits for practice tests.</li>
+            <li>Develop skimming and scanning techniques to quickly locate specific information.</li>
+            <li>Expand your vocabulary, especially academic and topic-specific words.</li>
+        {% endif %}
+    </ul>
+</div>
+
+<!-- Page break before Listening section -->
+<div class="page-break"></div>
+
+<!-- Listening Analysis -->
+<div class="section-analysis-header">Listening Analysis</div>
+
+<div class="analysis-grid">
+    <div class="analysis-column">
+        <div class="analysis-title">Strengths</div>
+        <ul class="analysis-list">
+            {% if listening_analysis.strengths %}
+                {% for strength in listening_analysis.strengths %}
+                    <li class="analysis-item">
+                        <span class="analysis-icon success-icon">✓</span>
+                        <span>{{ strength }}</span>
+                    </li>
+                {% endfor %}
+            {% else %}
+                <li class="analysis-item">
+                    <span>No specific strengths identified.</span>
+                </li>
+            {% endif %}
+        </ul>
+    </div>
+
+    <div class="analysis-column">
+        <div class="analysis-title">Areas for Improvement</div>
+        <ul class="analysis-list">
+            {% if listening_analysis.weaknesses %}
+                {% for weakness in listening_analysis.weaknesses %}
+                    <li class="analysis-item">
+                        <span class="analysis-icon error-icon">✗</span>
+                        <span>{{ weakness }}</span>
+                    </li>
+                {% endfor %}
+            {% else %}
+                <li class="analysis-item">
+                    <span>No specific areas for improvement identified.</span>
+                </li>
+            {% endif %}
+        </ul>
+    </div>
+</div>
+
+<!-- Rest of the template remains the same -->
+<!-- ... -->
+
+<!-- Footer -->
+<div class="pdf-footer">
+    <p>This document was generated by BandBooster IELTS Preparation Platform</p>
+    <p>Report generated on {{ now|date:"F j, Y" }}</p>
+</div>
+</body>
+</html>

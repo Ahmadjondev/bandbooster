@@ -1,0 +1,899 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Results History - BandBooster{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Results History Page Styles */
+    .history-container {
+        padding: 2rem;
+    }
+
+    .history-header {
+        margin-bottom: 2rem;
+    }
+
+    .history-header h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .history-header p {
+        color: var(--gray-color);
+    }
+
+    .history-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .history-filters {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .filter-select {
+        padding: 0.5rem 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: 0.5rem;
+        background-color: white;
+        font-size: 0.875rem;
+        min-width: 150px;
+    }
+
+    .download-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background-color: white;
+        border: 1px solid var(--border-color);
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .download-btn:hover {
+        background-color: #f8fafc;
+    }
+
+    .score-cards {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .score-card {
+        background-color: white;
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+
+    .score-card h3 {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--gray-color);
+        margin-bottom: 1rem;
+    }
+
+    .score-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .score-from {
+        font-size: 0.75rem;
+        color: var(--gray-color);
+    }
+
+    .score-change {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.25rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin-top: 0.5rem;
+    }
+
+    .score-change.positive {
+        color: #10b981;
+    }
+
+    .score-change.negative {
+        color: #ef4444;
+    }
+
+    .score-change.neutral {
+        color: var(--gray-color);
+    }
+
+    .history-tabs {
+        display: flex;
+        border-bottom: 1px solid var(--border-color);
+        margin-bottom: 2rem;
+    }
+
+    .history-tab {
+        padding: 1rem 1.5rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--gray-color);
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .history-tab:hover {
+        color: var(--primary-color);
+    }
+
+    .history-tab.active {
+        color: var(--primary-color);
+        border-bottom-color: var(--primary-color);
+    }
+
+    .history-tab svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    .tab-content {
+        background-color: white;
+        border-radius: 0.75rem;
+        padding: 2rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .chart-container {
+        height: 400px;
+        margin-bottom: 2rem;
+    }
+
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+
+    .section-subtitle {
+        font-size: 0.875rem;
+        color: var(--gray-color);
+        margin-bottom: 1.5rem;
+    }
+
+    .test-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .test-table th {
+        text-align: left;
+        padding: 1rem;
+        font-weight: 500;
+        color: var(--gray-color);
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .test-table td {
+        padding: 1rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .test-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .test-table tr:hover {
+        background-color: #f8fafc;
+    }
+
+    .test-id {
+        font-family: monospace;
+        font-size: 0.875rem;
+    }
+
+    .test-type {
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+        text-transform: uppercase;
+    }
+
+    .test-type.academic {
+        background-color: #1e293b;
+        color: white;
+    }
+
+    .test-type.general {
+        background-color: #f1f5f9;
+        color: #334155;
+    }
+
+    .test-score {
+        font-weight: 600;
+    }
+
+    .view-btn {
+        padding: 0.25rem 0.75rem;
+        background-color: #f1f5f9;
+        border: none;
+        border-radius: 0.25rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .view-btn:hover {
+        background-color: #e2e8f0;
+    }
+
+    .improvements-section {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-top: 2rem;
+    }
+
+    .improvement-card {
+        background-color: white;
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .improvement-card h3 {
+        font-size: 1.125rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .improvement-card p {
+        font-size: 0.875rem;
+        color: var(--gray-color);
+        margin-bottom: 1.5rem;
+    }
+
+    .improvement-item {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        background-color: #f8fafc;
+        margin-bottom: 1rem;
+    }
+
+    .improvement-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .improvement-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        flex-shrink: 0;
+    }
+
+    .improvement-icon.positive {
+        background-color: rgba(16, 185, 129, 0.1);
+        color: #10b981;
+    }
+
+    .improvement-icon.negative {
+        background-color: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+    }
+
+    .improvement-info {
+        flex: 1;
+    }
+
+    .improvement-info h4 {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .improvement-info p {
+        font-size: 0.875rem;
+        color: var(--gray-color);
+        margin: 0;
+    }
+
+    .improvement-change {
+        font-weight: 600;
+    }
+
+    .improvement-change.positive {
+        color: #10b981;
+    }
+
+    .improvement-change.negative {
+        color: #ef4444;
+    }
+
+    .focus-btn {
+        padding: 0.25rem 0.75rem;
+        background-color: #f1f5f9;
+        border: none;
+        border-radius: 0.25rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        margin-left: auto;
+    }
+
+    .focus-btn:hover {
+        background-color: #e2e8f0;
+    }
+
+    /* Responsive styles */
+    @media (max-width: 1200px) {
+        .score-cards {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    @media (max-width: 992px) {
+        .improvements-section {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .score-cards {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .history-actions {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .history-filters {
+            width: 100%;
+            justify-content: space-between;
+        }
+
+        .filter-select {
+            min-width: 120px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .score-cards {
+            grid-template-columns: 1fr;
+        }
+
+        .history-tabs {
+            overflow-x: auto;
+            white-space: nowrap;
+            padding-bottom: 0.5rem;
+        }
+
+        .history-tab {
+            padding: 0.75rem 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="history-container">
+
+    <div class="history-header">
+        <h1>Results History</h1>
+        <p>Track your progress and compare your IELTS mock exam results over time</p>
+    </div>
+
+    <div class="history-actions">
+        <div class="history-filters">
+            <select class="filter-select" id="test-type-filter">
+                <option value="all">All Tests</option>
+                <option value="academic">Academic</option>
+                <option value="general">General Training</option>
+            </select>
+
+            <select class="filter-select" id="time-filter">
+                <option value="all">All Time</option>
+                <option value="year">Last Year</option>
+                <option value="6months">Last 6 Months</option>
+                <option value="3months">Last 3 Months</option>
+            </select>
+        </div>
+
+        <button class="download-btn" id="download-history">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            Download History
+        </button>
+    </div>
+
+    <div class="score-cards">
+        <div class="score-card">
+            <h3>Overall Score</h3>
+            <div class="score-value">{{ current_scores.overall }}</div>
+            <div class="score-from">From {{ previous_scores.overall }} to {{ current_scores.overall }}</div>
+            {% if improvements.overall > 0 %}
+            <div class="score-change positive">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="18 15 12 9 6 15"></polyline>
+                </svg>
+                +{{ improvements.overall }}
+            </div>
+            {% elif improvements.overall < 0 %}
+            <div class="score-change negative">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+                {{ improvements.overall }}
+            </div>
+            {% else %}
+            <div class="score-change neutral">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                0
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="score-card">
+            <h3>Reading</h3>
+            <div class="score-value">{{ current_scores.reading }}</div>
+            <div class="score-from">From {{ previous_scores.reading }} to {{ current_scores.reading }}</div>
+            {% if improvements.reading > 0 %}
+            <div class="score-change positive">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="18 15 12 9 6 15"></polyline>
+                </svg>
+                +{{ improvements.reading }}
+            </div>
+            {% elif improvements.reading < 0 %}
+            <div class="score-change negative">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+                {{ improvements.reading }}
+            </div>
+            {% else %}
+            <div class="score-change neutral">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                0
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="score-card">
+            <h3>Listening</h3>
+            <div class="score-value">{{ current_scores.listening }}</div>
+            <div class="score-from">From {{ previous_scores.listening }} to {{ current_scores.listening }}</div>
+            {% if improvements.listening > 0 %}
+            <div class="score-change positive">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="18 15 12 9 6 15"></polyline>
+                </svg>
+                +{{ improvements.listening }}
+            </div>
+            {% elif improvements.listening < 0 %}
+            <div class="score-change negative">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+                {{ improvements.listening }}
+            </div>
+            {% else %}
+            <div class="score-change neutral">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                0
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="score-card">
+            <h3>Writing</h3>
+            <div class="score-value">{{ current_scores.writing }}</div>
+            <div class="score-from">From {{ previous_scores.writing }} to {{ current_scores.writing }}</div>
+            {% if improvements.writing > 0 %}
+            <div class="score-change positive">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="18 15 12 9 6 15"></polyline>
+                </svg>
+                +{{ improvements.writing }}
+            </div>
+            {% elif improvements.writing < 0 %}
+            <div class="score-change negative">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+                {{ improvements.writing }}
+            </div>
+            {% else %}
+            <div class="score-change neutral">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                0
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="score-card">
+            <h3>Speaking</h3>
+            <div class="score-value">{{ current_scores.speaking }}</div>
+            <div class="score-from">From {{ previous_scores.speaking }} to {{ current_scores.speaking }}</div>
+            {% if improvements.speaking > 0 %}
+            <div class="score-change positive">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="18 15 12 9 6 15"></polyline>
+                </svg>
+                +{{ improvements.speaking }}
+            </div>
+            {% elif improvements.speaking < 0 %}
+            <div class="score-change negative">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+                {{ improvements.speaking }}
+            </div>
+            {% else %}
+            <div class="score-change neutral">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                0
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="history-tabs">
+        <a href="{% url 'test_history' %}" class="history-tab {% if active_tab == 'overview' %}active{% endif %}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="20" x2="18" y2="10"></line>
+                <line x1="12" y1="20" x2="12" y2="4"></line>
+                <line x1="6" y1="20" x2="6" y2="14"></line>
+            </svg>
+            Progress Overview
+        </a>
+        <a href="{% url 'test_comparison' %}" class="history-tab {% if active_tab == 'comparison' %}active{% endif %}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 22h14"></path>
+                <path d="M5 2h14"></path>
+                <path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"></path>
+                <path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"></path>
+            </svg>
+            First vs Latest
+        </a>
+        <a href="{% url 'progress_overview' %}" class="history-tab {% if active_tab == 'progress' %}active{% endif %}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+            </svg>
+            Test History
+        </a>
+    </div>
+
+    <div class="tab-content">
+        <div class="section-title">Score Progression</div>
+        <div class="section-subtitle">Your IELTS band score progression over time</div>
+
+        <div class="chart-container">
+            <canvas id="progressionChart"></canvas>
+        </div>
+
+        <div class="section-title">Complete Test History</div>
+        <div class="section-subtitle">All your IELTS mock test attempts</div>
+
+        <table class="test-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Test ID</th>
+                    <th>Type</th>
+                    <th>Overall</th>
+                    <th>Reading</th>
+                    <th>Listening</th>
+                    <th>Writing</th>
+                    <th>Speaking</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for test in user_tests %}
+                <tr>
+                    <td>{{ test.completed_at|date:"M d, Y" }}</td>
+                    <td class="test-id">{{ test.id|truncatechars:10 }}</td>
+                    <td>
+                        <span class="test-type {{ test.test_type }}">{{ test.test_type }}</span>
+                    </td>
+                    <td class="test-score">{{ test.overall_score }}</td>
+                    <td>{{ test.reading_score }}</td>
+                    <td>{{ test.listening_score }}</td>
+                    <td>{{ test.writing_score }}</td>
+                    <td>{{ test.speaking_score|default:"-" }}</td>
+                    <td>
+                        <a href="{% url 'test_results' test_id=test.id %}" class="view-btn">View</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="9" style="text-align: center; padding: 2rem;">
+                        <p>You haven't completed any tests yet.</p>
+                        <a href="{% url 'ielts_mock' %}" class="btn btn-primary" style="margin-top: 1rem;">Take Your First Test</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="improvements-section">
+            <div class="improvement-card">
+                <h3>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                        <polyline points="17 6 23 6 23 12"></polyline>
+                    </svg>
+                    Key Improvements
+                </h3>
+                <p>Areas where you've shown the most progress</p>
+
+                {% if key_improvements %}
+                    {% for improvement in key_improvements %}
+                    <div class="improvement-item">
+                        <div class="improvement-icon positive">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                                <polyline points="17 6 23 6 23 12"></polyline>
+                            </svg>
+                        </div>
+                        <div class="improvement-info">
+                            <h4>
+                                {{ improvement.section }}
+                                <span class="improvement-change positive">+{{ improvement.change }}</span>
+                            </h4>
+                            <p>{{ improvement.message }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="improvement-item">
+                        <div class="improvement-icon neutral">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="8" x2="12" y2="12"></line>
+                                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                            </svg>
+                        </div>
+                        <div class="improvement-info">
+                            <h4>Not enough data</h4>
+                            <p>Complete more tests to see your improvements</p>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="improvement-card">
+                <h3>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    Areas to Focus
+                </h3>
+                <p>Sections that need more attention</p>
+
+                {% if focus_areas %}
+                    {% for area in focus_areas %}
+                    <div class="improvement-item">
+                        <div class="improvement-icon negative">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="8" x2="12" y2="12"></line>
+                                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                            </svg>
+                        </div>
+                        <div class="improvement-info">
+                            <h4>
+                                {{ area.section }}
+                                <span class="test-score">{{ area.score }}</span>
+                            </h4>
+                            <p>{{ area.message }}</p>
+                        </div>
+                        <button class="focus-btn">Focus Area</button>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="improvement-item">
+                        <div class="improvement-icon positive">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                            </svg>
+                        </div>
+                        <div class="improvement-info">
+                            <h4>Great job!</h4>
+                            <p>You're performing well across all sections</p>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Chart.js configuration
+        const ctx = document.getElementById('progressionChart').getContext('2d');
+        const progressionChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: {{ chart_data.dates|safe }},
+                datasets: [
+                    {
+                        label: 'Overall',
+                        data: {{ chart_data.overall|safe }},
+                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                        tension: 0.4,
+                        fill: true,
+                        borderWidth: 2,
+                        pointBackgroundColor: '#2563eb'
+                    },
+                    {
+                        label: 'Reading',
+                        data: {{ chart_data.reading|safe }},
+                        borderColor: '#10b981',
+                        backgroundColor: 'transparent',
+                        tension: 0.4,
+                        borderWidth: 2,
+                        pointBackgroundColor: '#10b981'
+                    },
+                    {
+                        label: 'Listening',
+                        data: {{ chart_data.listening|safe }},
+                        borderColor: '#f59e0b',
+                        backgroundColor: 'transparent',
+                        tension: 0.4,
+                        borderWidth: 2,
+                        pointBackgroundColor: '#f59e0b'
+                    },
+                    {
+                        label: 'Writing',
+                        data: {{ chart_data.writing|safe }},
+                        borderColor: '#ef4444',
+                        backgroundColor: 'transparent',
+                        tension: 0.4,
+                        borderWidth: 2,
+                        pointBackgroundColor: '#ef4444'
+                    },
+                    {
+                        label: 'Speaking',
+                        data: {{ chart_data.speaking|safe }},
+                        borderColor: '#8b5cf6',
+                        backgroundColor: 'transparent',
+                        tension: 0.4,
+                        borderWidth: 2,
+                        pointBackgroundColor: '#8b5cf6'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        min: 0,
+                        max: 9,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 20
+                        }
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        titleColor: '#1e293b',
+                        bodyColor: '#1e293b',
+                        borderColor: '#e2e8f0',
+                        borderWidth: 1,
+                        padding: 12,
+                        boxPadding: 6,
+                        usePointStyle: true,
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': ' + context.parsed.y;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Filter functionality
+        const testTypeFilter = document.getElementById('test-type-filter');
+        const timeFilter = document.getElementById('time-filter');
+
+        function applyFilters() {
+            const testType = testTypeFilter.value;
+            const timeFrame = timeFilter.value;
+            
+            // In a real implementation, this would make an AJAX request to filter the data
+            console.log(`Filtering by test type: ${testType} and time frame: ${timeFrame}`);
+            
+            // For demo purposes, we'll just reload the page with query parameters
+            // window.location.href = `{% url 'test_history' %}?test_type=${testType}&time_frame=${timeFrame}`;
+        }
+
+        testTypeFilter.addEventListener('change', applyFilters);
+        timeFilter.addEventListener('change', applyFilters);
+
+        // Download functionality
+        const downloadBtn = document.getElementById('download-history');
+        downloadBtn.addEventListener('click', function() {
+            // In a real implementation, this would trigger a download
+            console.log('Downloading history...');
+            alert('Your history report is being generated and will download shortly.');
+        });
+
+        // Focus area buttons
+        const focusBtns = document.querySelectorAll('.focus-btn');
+        focusBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const section = this.parentElement.querySelector('h4').textContent.trim().split(' ')[0];
+                alert(`Redirecting to practice exercises for ${section}...`);
+                // In a real implementation, this would redirect to practice exercises
+                // window.location.href = `/practice/${section.toLowerCase()}/`;
+            });
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %}

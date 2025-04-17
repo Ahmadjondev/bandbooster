@@ -1,0 +1,739 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+{% load static %}
+
+{% block title %}{{ section_title }} - BandBooster{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <style>
+        .analysis-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .analysis-header {
+            margin-bottom: 2rem;
+        }
+
+        .analysis-header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #0f172a;
+        }
+
+        .analysis-header p {
+            color: #64748b;
+        }
+
+        .analysis-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 2rem;
+        }
+
+        .analysis-card h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #0f172a;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .analysis-card h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 1.5rem 0 0.75rem;
+            color: #0f172a;
+        }
+
+        .analysis-card h3:first-of-type {
+            margin-top: 0;
+        }
+
+        .analysis-card p {
+            color: #334155;
+            margin-bottom: 1rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background-color: #f8fafc;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: #64748b;
+        }
+
+        .question-type-performance {
+            margin-bottom: 1.5rem;
+        }
+
+        .question-type {
+            margin-bottom: 1rem;
+        }
+
+        .question-type-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .question-type-name {
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .question-type-score {
+            font-weight: 600;
+        }
+
+        .question-type-score.good {
+            color: #10b981;
+        }
+
+        .question-type-score.average {
+            color: #f59e0b;
+        }
+
+        .question-type-score.poor {
+            color: #ef4444;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background-color: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+        }
+
+        .progress-fill.good {
+            background-color: #10b981;
+        }
+
+        .progress-fill.average {
+            background-color: #f59e0b;
+        }
+
+        .progress-fill.poor {
+            background-color: #ef4444;
+        }
+
+        .section-performance {
+            margin-bottom: 1.5rem;
+        }
+
+        .section-item {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .section-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+        }
+
+        .section-title {
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .section-score {
+            font-weight: 600;
+        }
+
+        .question-list {
+            background-color: #f8fafc;
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .question-item {
+            display: flex;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .question-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .question-status {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            margin-right: 0.75rem;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .question-status.correct {
+            background-color: #10b981;
+        }
+
+        .question-status.incorrect {
+            background-color: #ef4444;
+        }
+
+        .question-content {
+            flex: 1;
+        }
+
+        .question-text {
+            font-size: 0.95rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .question-answer {
+            font-size: 0.875rem;
+            color: #64748b;
+        }
+
+        .question-answer span {
+            font-weight: 600;
+        }
+
+        .writing-analysis {
+            margin-bottom: 1.5rem;
+        }
+
+        .criteria-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .criteria-card {
+            background-color: #f8fafc;
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .criteria-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .criteria-name {
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .criteria-score {
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .feedback-list {
+            margin-top: 1.5rem;
+        }
+
+        .feedback-list h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: #0f172a;
+        }
+
+        .feedback-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .feedback-icon {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        .feedback-icon.positive {
+            color: #10b981;
+        }
+
+        .feedback-icon.negative {
+            color: #ef4444;
+        }
+
+        .feedback-text {
+            font-size: 0.95rem;
+            color: #334155;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .action-button {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .action-button.primary {
+            background-color: #0f172a;
+            color: white;
+            border: none;
+        }
+
+        .action-button.primary:hover {
+            background-color: #1e293b;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.15);
+        }
+
+        .action-button.secondary {
+            background-color: white;
+            color: #0f172a;
+            border: 1px solid #e2e8f0;
+        }
+
+        .action-button.secondary:hover {
+            background-color: #f8fafc;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .criteria-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="dashboard-container">
+        <!-- Include the sidebar -->
+        {% include 'core/partials/sidebar.html' with active_page='ielts_mock' %}
+
+        <main class="dashboard-main">
+            <div class="analysis-container">
+                <div class="analysis-header">
+                    <h1>{{ section_title }}</h1>
+                    <p>Detailed analysis of your {{ section }} performance in the IELTS mock test.</p>
+                </div>
+
+                {% if section == 'reading' %}
+                    <div class="analysis-card">
+                        <h2>Reading Performance Overview</h2>
+
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-value">{{ analysis.correct_answers }}/{{ analysis.total_questions }}</div>
+                                <div class="stat-label">Questions Answered Correctly</div>
+                            </div>
+
+                            <div class="stat-card">
+                                <div class="stat-value">{{ test.reading_score }}</div>
+                                <div class="stat-label">Band Score</div>
+                            </div>
+
+                            <div class="stat-card">
+                                <div class="stat-value">{{ analysis.correct_answers|floatformat:0|default:0|multiply:100|divisibleby:analysis.total_questions }}%</div>
+                                <div class="stat-label">Accuracy</div>
+                            </div>
+                        </div>
+
+                        <h3>Performance by Question Type</h3>
+                        <div class="question-type-performance">
+                            {% for type, data in analysis.question_types.items %}
+                                {% if data.total > 0 %}
+                                    <div class="question-type">
+                                        <div class="question-type-header">
+                                            <div class="question-type-name">{{ type|title|replace_underscore }}</div>
+                                            <div class="question-type-score {% if data.accuracy >= 80 %}good{% elif data.accuracy >= 60 %}average{% else %}poor{% endif %}">
+                                                {{ data.correct }}/{{ data.total }} ({{ data.accuracy }}%)
+                                            </div>
+                                        </div>
+                                        <div class="progress-bar">
+                                            <div class="progress-fill {% if data.accuracy >= 80 %}good{% elif data.accuracy >= 60 %}average{% else %}poor{% endif %}" style="width: {{ data.accuracy }}%;"></div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+
+                        <h3>Performance by Section</h3>
+                        <div class="section-performance">
+                            {% for section in analysis.sections %}
+                                <div class="section-item">
+                                    <div class="section-header">
+                                        <div class="section-title">{{ section.title }}</div>
+                                        <div class="section-score">{{ section.correct }}/{{ section.total }}</div>
+                                    </div>
+
+                                    <div class="question-list">
+                                        {% for question in section.questions %}
+                                            <div class="question-item">
+                                                <div class="question-status {% if question.is_correct %}correct{% else %}incorrect{% endif %}">
+                                                    {% if question.is_correct %}
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                            <polyline points="20 6 9 17 4 12"></polyline>
+                                                        </svg>
+                                                    {% else %}
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                                                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                                                        </svg>
+                                                    {% endif %}
+                                                </div>
+
+                                                <div class="question-content">
+                                                    <div class="question-text">{{ question.text }}</div>
+                                                    <div class="question-answer">
+                                                        Your answer: <span>{{ question.user_answer|default:"Not answered" }}</span>
+                                                    </div>
+                                                    <div class="question-answer">
+                                                        Correct answer: <span>{{ question.correct_answer }}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% elif section == 'listening' %}
+                    <div class="analysis-card">
+                        <h2>Listening Performance Overview</h2>
+
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-value">{{ analysis.correct_answers }}/{{ analysis.total_questions }}</div>
+                                <div class="stat-label">Questions Answered Correctly</div>
+                            </div>
+
+                            <div class="stat-card">
+                                <div class="stat-value">{{ test.listening_score }}</div>
+                                <div class="stat-label">Band Score</div>
+                            </div>
+
+                            <div class="stat-card">
+                                <div class="stat-value">{{ analysis.correct_answers|floatformat:0|default:0|multiply:100|divisibleby:analysis.total_questions }}%</div>
+                                <div class="stat-label">Accuracy</div>
+                            </div>
+                        </div>
+
+                        <h3>Performance by Question Type</h3>
+                        <div class="question-type-performance">
+                            {% for type, data in analysis.question_types.items %}
+                                {% if data.total > 0 %}
+                                    <div class="question-type">
+                                        <div class="question-type-header">
+                                            <div class="question-type-name">{{ type|title|replace_underscore }}</div>
+                                            <div class="question-type-score {% if data.accuracy >= 80 %}good{% elif data.accuracy >= 60 %}average{% else %}poor{% endif %}">
+                                                {{ data.correct }}/{{ data.total }} ({{ data.accuracy }}%)
+                                            </div>
+                                        </div>
+                                        <div class="progress-bar">
+                                            <div class="progress-fill {% if data.accuracy >= 80 %}good{% elif data.accuracy >= 60 %}average{% else %}poor{% endif %}" style="width: {{ data.accuracy }}%;"></div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+
+                        <h3>Performance by Section</h3>
+                        <div class="section-performance">
+                            {% for section in analysis.sections %}
+                                <div class="section-item">
+                                    <div class="section-header">
+                                        <div class="section-title">{{ section.title }}</div>
+                                        <div class="section-score">{{ section.correct }}/{{ section.total }}</div>
+                                    </div>
+
+                                    <p>{{ section.description }}</p>
+
+                                    <div class="question-list">
+                                        {% for question in section.questions %}
+                                            <div class="question-item">
+                                                <div class="question-status {% if question.is_correct %}correct{% else %}incorrect{% endif %}">
+                                                    {% if question.is_correct %}
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                            <polyline points="20 6 9 17 4 12"></polyline>
+                                                        </svg>
+                                                    {% else %}
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                                                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                                                        </svg>
+                                                    {% endif %}
+                                                </div>
+
+                                                <div class="question-content">
+                                                    <div class="question-text">{{ question.text }}</div>
+                                                    <div class="question-answer">
+                                                        Your answer: <span>{{ question.user_answer|default:"Not answered" }}</span>
+                                                    </div>
+                                                    <div class="question-answer">
+                                                        Correct answer: <span>{{ question.correct_answer }}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% elif section == 'writing' %}
+                    <div class="analysis-card">
+                        <h2>Writing Performance Overview</h2>
+
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-value">{{ test.writing_score }}</div>
+                                <div class="stat-label">Overall Band Score</div>
+                            </div>
+
+                            <div class="stat-card">
+                                <div class="stat-value">{{ analysis.task1.overall_score }}</div>
+                                <div class="stat-label">Task 1 Score</div>
+                            </div>
+
+                            <div class="stat-card">
+                                <div class="stat-value">{{ analysis.task2.overall_score }}</div>
+                                <div class="stat-label">Task 2 Score</div>
+                            </div>
+                        </div>
+
+                        <h3>Task 1 Analysis</h3>
+                        <div class="writing-analysis">
+                            <div class="criteria-grid">
+                                <div class="criteria-card">
+                                    <div class="criteria-header">
+                                        <div class="criteria-name">Task Achievement</div>
+                                        <div class="criteria-score">{{ analysis.task1.task_achievement }}</div>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill {% if analysis.task1.task_achievement >= 7 %}good{% elif analysis.task1.task_achievement >= 5.5 %}average{% else %}poor{% endif %}" style="width: {{ analysis.task1.task_achievement|multiply:11.11 }}%;"></div>
+                                    </div>
+                                </div>
+
+                                <div class="criteria-card">
+                                    <div class="criteria-header">
+                                        <div class="criteria-name">Coherence & Cohesion</div>
+                                        <div class="criteria-score">{{ analysis.task1.coherence_cohesion }}</div>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill {% if analysis.task1.coherence_cohesion >= 7 %}good{% elif analysis.task1.coherence_cohesion >= 5.5 %}average{% else %}poor{% endif %}" style="width: {{ analysis.task1.coherence_cohesion|multiply:11.11 }}%;"></div>
+                                    </div>
+                                </div>
+
+                                <div class="criteria-card">
+                                    <div class="criteria-header">
+                                        <div class="criteria-name">Lexical Resource</div>
+                                        <div class="criteria-score">{{ analysis.task1.lexical_resource }}</div>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill {% if analysis.task1.lexical_resource >= 7 %}good{% elif analysis.task1.lexical_resource >= 5.5 %}average{% else %}poor{% endif %}" style="width: {{ analysis.task1.lexical_resource|multiply:11.11 }}%;"></div>
+                                    </div>
+                                </div>
+
+                                <div class="criteria-card">
+                                    <div class="criteria-header">
+                                        <div class="criteria-name">Grammatical Range</div>
+                                        <div class="criteria-score">{{ analysis.task1.grammatical_range }}</div>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill {% if analysis.task1.grammatical_range >= 7 %}good{% elif analysis.task1.grammatical_range >= 5.5 %}average{% else %}poor{% endif %}" style="width: {{ analysis.task1.grammatical_range|multiply:11.11 }}%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="feedback-list">
+                                <h4>Strengths</h4>
+                                {% for strength in analysis.task1.strengths %}
+                                    <div class="feedback-item">
+                                        <div class="feedback-icon positive">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                            </svg>
+                                        </div>
+                                        <div class="feedback-text">{{ strength }}</div>
+                                    </div>
+                                {% endfor %}
+
+                                <h4>Areas for Improvement</h4>
+                                {% for improvement in analysis.task1.improvements %}
+                                    <div class="feedback-item">
+                                        <div class="feedback-icon negative">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <circle cx="12" cy="12" r="10"></circle>
+                                                <line x1="12" y1="8" x2="12" y2="12"></line>
+                                                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                            </svg>
+                                        </div>
+                                        <div class="feedback-text">{{ improvement }}</div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <h3>Task 2 Analysis</h3>
+                        <div class="writing-analysis">
+                            <div class="criteria-grid">
+                                <div class="criteria-card">
+                                    <div class="criteria-header">
+                                        <div class="criteria-name">Task Achievement</div>
+                                        <div class="criteria-score">{{ analysis.task2.task_achievement }}</div>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill {% if analysis.task2.task_achievement >= 7 %}good{% elif analysis.task2.task_achievement >= 5.5 %}average{% else %}poor{% endif %}" style="width: {{ analysis.task2.task_achievement|multiply:11.11 }}%;"></div>
+                                    </div>
+                                </div>
+
+                                <div class="criteria-card">
+                                    <div class="criteria-header">
+                                        <div class="criteria-name">Coherence & Cohesion</div>
+                                        <div class="criteria-score">{{ analysis.task2.coherence_cohesion }}</div>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill {% if analysis.task2.coherence_cohesion >= 7 %}good{% elif analysis.task2.coherence_cohesion >= 5.5 %}average{% else %}poor{% endif %}" style="width: {{ analysis.task2.coherence_cohesion|multiply:11.11 }}%;"></div>
+                                    </div>
+                                </div>
+
+                                <div class="criteria-card">
+                                    <div class="criteria-header">
+                                        <div class="criteria-name">Lexical Resource</div>
+                                        <div class="criteria-score">{{ analysis.task2.lexical_resource }}</div>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill {% if analysis.task2.lexical_resource >= 7 %}good{% elif analysis.task2.lexical_resource >= 5.5 %}average{% else %}poor{% endif %}" style="width: {{ analysis.task2.lexical_resource|multiply:11.11 }}%;"></div>
+                                    </div>
+                                </div>
+
+                                <div class="criteria-card">
+                                    <div class="criteria-header">
+                                        <div class="criteria-name">Grammatical Range</div>
+                                        <div class="criteria-score">{{ analysis.task2.grammatical_range }}</div>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill {% if analysis.task2.grammatical_range >= 7 %}good{% elif analysis.task2.grammatical_range >= 5.5 %}average{% else %}poor{% endif %}" style="width: {{ analysis.task2.grammatical_range|multiply:11.11 }}%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="feedback-list">
+                                <h4>Strengths</h4>
+                                {% for strength in analysis.task2.strengths %}
+                                    <div class="feedback-item">
+                                        <div class="feedback-icon positive">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                            </svg>
+                                        </div>
+                                        <div class="feedback-text">{{ strength }}</div>
+                                    </div>
+                                {% endfor %}
+
+                                <h4>Areas for Improvement</h4>
+                                {% for improvement in analysis.task2.improvements %}
+                                    <div class="feedback-item">
+                                        <div class="feedback-icon negative">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <circle cx="12" cy="12" r="10"></circle>
+                                                <line x1="12" y1="8" x2="12" y2="12"></line>
+                                                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                            </svg>
+                                        </div>
+                                        <div class="feedback-text">{{ improvement }}</div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <div class="action-buttons">
+                    <a href="{% url 'test_results' test_id=test.id %}" class="action-button secondary">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="19" y1="12" x2="5" y2="12"></line>
+                            <polyline points="12 19 5 12 12 5"></polyline>
+                        </svg>
+                        Back to Results
+                    </a>
+
+                    <a href="{% url 'improvement_plan' test_id=test.id %}" class="action-button primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 11 12 14 22 4"></polyline>
+                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                        </svg>
+                        View Improvement Plan
+                    </a>
+                </div>
+            </div>
+        </main>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Any JavaScript functionality for the section analysis page
+        });
+    </script>
+{% endblock %}

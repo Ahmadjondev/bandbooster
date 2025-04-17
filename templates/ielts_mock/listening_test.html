@@ -1,0 +1,1014 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block title %}IELTS Mock Test - Listening{% endblock %}
+
+{% block extra_css %}
+    <style>
+        .test-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        .question-container {
+            margin-bottom: 30px;
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .question-text {
+            font-weight: 500;
+            margin-bottom: 15px;
+        }
+
+        .options-container {
+            margin-left: 20px;
+        }
+
+        .option-item {
+            margin-bottom: 10px;
+        }
+
+        .audio-player {
+            width: 100%;
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #e3f2fd;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 20px;
+            z-index: 100;
+        }
+
+        .audio-controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .audio-title {
+            font-weight: 600;
+            color: #1565c0;
+            margin-bottom: 10px;
+        }
+
+        .timer {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #e74c3c;
+            margin-bottom: 20px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            background-color: white;
+            padding: 10px;
+            z-index: 101;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .submit-btn {
+            background-color: #2ecc71;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+
+        .submit-btn:hover {
+            background-color: #27ae60;
+        }
+
+        .section-instructions {
+            background-color: #f1f8e9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #8bc34a;
+        }
+
+        /* Full-screen mode styles */
+        .fullscreen-mode {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .fullscreen-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 1001;
+        }
+
+        .fullscreen-toggle:hover {
+            background-color: #2980b9;
+        }
+
+        /* Progress indicator */
+        .progress-container {
+            width: 100%;
+            background-color: #f1f1f1;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            height: 10px;
+        }
+
+        .progress-bar {
+            height: 10px;
+            background-color: #4caf50;
+            border-radius: 5px;
+            transition: width 0.3s;
+        }
+
+        /* Audio visualization */
+        .audio-visualization {
+            height: 60px;
+            background-color: #fff;
+            border-radius: 5px;
+            margin-top: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .visualization-bars {
+            display: flex;
+            align-items: flex-end;
+            height: 100%;
+            padding: 0 5px;
+        }
+
+        .bar {
+            background-color: #3498db;
+            width: 3px;
+            margin: 0 1px;
+            border-radius: 1px 1px 0 0;
+            transition: height 0.1s ease;
+        }
+
+        /* Section tabs */
+        .section-tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            position: sticky;
+            top: 50px;
+            background-color: white;
+            z-index: 99;
+            padding: 10px 0;
+        }
+
+        .section-tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            font-weight: 500;
+            color: #7f8c8d;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            margin-right: 5px;
+        }
+
+        .section-tab.active {
+            color: #3498db;
+            border-bottom-color: #3498db;
+        }
+
+        .section-tab:hover:not(.active) {
+            color: #2980b9;
+            border-bottom-color: #bdc3c7;
+        }
+
+        .section-content {
+            display: none;
+        }
+
+        .section-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Current question highlight */
+        .question-item {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+            border: 1px solid #e0e0e0;
+        }
+
+        .question-item.active {
+            background-color: #e3f2fd;
+            border-color: #3498db;
+            box-shadow: 0 4px 10px rgba(52, 152, 219, 0.2);
+        }
+
+        /* Navigation buttons */
+        .section-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        .nav-btn {
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+        }
+
+        .nav-btn:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .nav-btn:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .nav-btn.prev {
+            background-color: #7f8c8d;
+        }
+
+        .nav-btn.prev:hover {
+            background-color: #6c7a89;
+        }
+
+        /* Audio player controls */
+        .audio-player-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .audio-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .audio-btn:hover {
+            background-color: #2980b9;
+            transform: scale(1.1);
+        }
+
+        .audio-progress {
+            flex: 1;
+            height: 8px;
+            background-color: #e0e0e0;
+            border-radius: 4px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .audio-progress-bar {
+            height: 100%;
+            background-color: #3498db;
+            border-radius: 4px;
+            width: 0%;
+        }
+
+        .audio-time {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        /* Question counter */
+        .question-counter {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .question-counter .current {
+            font-weight: 600;
+            color: #3498db;
+        }
+
+        /* Speech settings */
+        .speech-settings {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .speech-settings h4 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 1rem;
+            color: #2c3e50;
+        }
+
+        .speech-settings-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .speech-settings-row label {
+            margin-right: 10px;
+            min-width: 100px;
+        }
+
+        .speech-settings-row select,
+        .speech-settings-row input {
+            padding: 5px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+
+        .speech-settings-row input[type="range"] {
+            flex: 1;
+        }
+
+        .speech-value {
+            min-width: 40px;
+            text-align: right;
+            margin-left: 10px;
+        }
+
+        /* Loading overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid rgba(52, 152, 219, 0.2);
+            border-radius: 50%;
+            border-top-color: #3498db;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1.5rem;
+        }
+
+        .loading-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+
+        .loading-subtext {
+            font-size: 0.95rem;
+            color: #7f8c8d;
+            text-align: center;
+            max-width: 400px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="test-container" id="testContainer">
+        <div class="timer" id="timer">Time Remaining: 30:00</div>
+
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+        </div>
+
+        <h1 class="section-title">IELTS Listening Test</h1>
+
+        <div class="section-instructions">
+            <p><strong>Instructions:</strong> You will hear a series of recordings and you will have to answer questions based on what you hear. There are 4 sections in the listening test with 10 questions in each section. You will have time to read the questions before you listen to the recording. The recording will play ONCE only.</p>
+        </div>
+
+        <!-- Section tabs -->
+        <div class="section-tabs">
+            {% for section in listening_content.sections %}
+                <div class="section-tab {% if forloop.first %}active{% endif %}" data-section="{{ forloop.counter }}">
+                    Part {{ forloop.counter }}
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Audio player (sticky) -->
+        <div class="audio-player" id="audioPlayerContainer">
+            <div class="audio-title" id="currentAudioTitle">Audio for Section 1</div>
+
+            <div class="audio-player-controls">
+                <button class="audio-btn" id="playPauseBtn">
+                    <i class="fas fa-play" id="playPauseIcon"></i>
+                </button>
+
+                <div class="audio-progress" id="audioProgress">
+                    <div class="audio-progress-bar" id="audioProgressBar"></div>
+                </div>
+
+                <div class="audio-time" id="audioTime">00:00 / 00:00</div>
+            </div>
+
+            <div class="audio-visualization">
+                <div class="visualization-bars" id="visualization-current">
+                    {% for i in "12345678910123456789101234567891012345" %}
+                        <div class="bar" style="height: 0px;"></div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Speech settings -->
+            <div class="speech-settings">
+                <h4>Speech Settings</h4>
+                <div class="speech-settings-row">
+                    <label for="voice-select">Voice:</label>
+                    <select id="voice-select" class="form-control">
+                        <option value="">Default Voice</option>
+                        <!-- Voices will be populated by JavaScript -->
+                    </select>
+                </div>
+                <div class="speech-settings-row">
+                    <label for="rate-slider">Speed:</label>
+                    <input type="range" id="rate-slider" min="0.5" max="2" step="0.1" value="1" class="form-control">
+                    <span id="rate-value" class="speech-value">1.0</span>
+                </div>
+                <div class="speech-settings-row">
+                    <label for="pitch-slider">Pitch:</label>
+                    <input type="range" id="pitch-slider" min="0.5" max="2" step="0.1" value="1" class="form-control">
+                    <span id="pitch-value" class="speech-value">1.0</span>
+                </div>
+            </div>
+
+            <!-- Hidden section scripts -->
+            <div id="section-scripts" style="display: none;">
+                {% for script in section_scripts %}
+                    <div id="script-section-{{ forloop.counter }}">{{ script }}</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <form id="listeningForm" method="post" action="{% url 'submit_listening' test_id=test.id %}">
+            {% csrf_token %}
+
+            {% for section in listening_content.sections %}
+                <div class="section-content {% if forloop.first %}active{% endif %}" id="section-{{ forloop.counter }}">
+                    <h2 class="section-title">Section {{ forloop.counter }}: {{ section.title }}</h2>
+                    <p>{{ section.description }}</p>
+
+                    <div class="question-counter">
+                        <span>Section {{ forloop.counter }}</span>
+                        <span><span class="current">0</span> of {{ section.questions|length }} questions answered</span>
+                    </div>
+
+                    {% for question in section.questions %}
+                        <div class="question-item" id="question-{{ section.title|slugify }}-{{ question.id }}">
+                            <div class="question-text">
+                                <strong>Question {{ question.id }}:</strong> {{ question.text }}
+                            </div>
+
+                            {% if question.type == 'multiple_choice' %}
+                                <div class="options-container">
+                                    {% for option in question.options %}
+                                        <div class="option-item">
+                                            <input type="radio" id="question_{{ question.id }}_option_{{ forloop.counter }}"
+                                                   name="question_{{ question.id }}" value="{{ option }}"
+                                                   class="question-input" data-section="{{ forloop.parentloop.parentloop.counter }}" data-question="{{ question.id }}">
+                                            <label for="question_{{ question.id }}_option_{{ forloop.counter }}">{{ option }}</label>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="options-container">
+                                    <input type="text" name="question_{{ question.id }}" class="form-control question-input"
+                                           placeholder="Your answer" data-section="{{ forloop.counter }}" data-question="{{ question.id }}">
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+
+                    <div class="section-navigation">
+                        {% if not forloop.first %}
+                            <button type="button" class="nav-btn prev" data-goto="{{ forloop.counter|add:"-1" }}">
+                                <i class="fas fa-arrow-left"></i> Previous Section
+                            </button>
+                        {% else %}
+                            <div></div> <!-- Empty div for spacing -->
+                        {% endif %}
+
+                        {% if not forloop.last %}
+                            <button type="button" class="nav-btn next" data-goto="{{ forloop.counter|add:"1" }}">
+                                Next Section <i class="fas fa-arrow-right"></i>
+                            </button>
+                        {% else %}
+                            <button type="submit" class="submit-btn">
+                                Submit Answers <i class="fas fa-check"></i>
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </form>
+
+        <!-- Loading overlay -->
+        <div class="loading-overlay" id="loading-overlay" style="display: none;">
+            <div class="spinner"></div>
+            <div class="loading-text">Submitting Your Answers</div>
+            <div class="loading-subtext">Please wait while we process your responses...</div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Timer functionality
+            let timeLeft = 30 * 60; // 30 minutes in seconds
+            const timerElement = document.getElementById('timer');
+            const progressBar = document.getElementById('progressBar');
+
+            const timerInterval = setInterval(function() {
+                timeLeft--;
+
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+
+                timerElement.textContent = `Time Remaining: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+
+                // Update progress bar
+                const progressPercentage = ((30 * 60 - timeLeft) / (30 * 60)) * 100;
+                progressBar.style.width = `${progressPercentage}%`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    document.getElementById('listeningForm').submit();
+                }
+            }, 1000);
+
+            // Section tabs functionality
+            const sectionTabs = document.querySelectorAll('.section-tab');
+            const sectionContents = document.querySelectorAll('.section-content');
+
+            sectionTabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const sectionNumber = this.getAttribute('data-section');
+
+                    // Update active tab
+                    sectionTabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+
+                    // Show corresponding section content
+                    sectionContents.forEach(content => content.classList.remove('active'));
+                    document.getElementById(`section-${sectionNumber}`).classList.add('active');
+
+                    // Update audio player title
+                    document.getElementById('currentAudioTitle').textContent = `Audio for Section ${sectionNumber}`;
+
+                    // Stop any ongoing speech
+                    if (window.speechSynthesis) {
+                        window.speechSynthesis.cancel();
+                    }
+
+                    // Set the current section
+                    currentSection = parseInt(sectionNumber);
+                    isPlaying = false;
+                    playPauseIcon.className = 'fas fa-play';
+
+                    // Reset progress bar
+                    audioProgressBar.style.width = '0%';
+                    audioTime.textContent = '00:00 / 00:00';
+
+                    // Stop visualization
+                    stopVisualization();
+                });
+            });
+
+            // Navigation buttons
+            const navButtons = document.querySelectorAll('.nav-btn');
+
+            navButtons.forEach(button => {
+                if (button.classList.contains('next') || button.classList.contains('prev')) {
+                    button.addEventListener('click', function() {
+                        const gotoSection = this.getAttribute('data-goto');
+
+                        // Click the corresponding tab
+                        document.querySelector(`.section-tab[data-section="${gotoSection}"]`).click();
+
+                        // Scroll to top of section
+                        window.scrollTo({
+                            top: document.querySelector('.section-tabs').offsetTop - 60,
+                            behavior: 'smooth'
+                        });
+                    });
+                }
+            });
+
+            // Text-to-Speech functionality
+            const playPauseBtn = document.getElementById('playPauseBtn');
+            const playPauseIcon = document.getElementById('playPauseIcon');
+            const audioProgress = document.getElementById('audioProgress');
+            const audioProgressBar = document.getElementById('audioProgressBar');
+            const audioTime = document.getElementById('audioTime');
+
+            // Speech settings elements
+            const voiceSelect = document.getElementById('voice-select');
+            const rateSlider = document.getElementById('rate-slider');
+            const pitchSlider = document.getElementById('pitch-slider');
+            const rateValue = document.getElementById('rate-value');
+            const pitchValue = document.getElementById('pitch-value');
+
+            // Get section scripts
+            const sectionScripts = [];
+            {% for script in section_scripts %}
+                sectionScripts.push(`{{ script|escapejs }}`);
+            {% endfor %}
+
+            let currentSection = 1;
+            let isPlaying = false;
+            let utterance = null;
+            let startTime = 0;
+            let totalDuration = 0;
+            let animationFrameId = null;
+
+            // Initialize speech synthesis
+            if (!window.speechSynthesis) {
+                alert("Your browser doesn't support text to speech. Please use a modern browser like Chrome, Edge, or Safari.");
+            } else {
+                // Populate voice select dropdown
+                function populateVoiceList() {
+                    const voices = speechSynthesis.getVoices();
+                    voiceSelect.innerHTML = '<option value="">Default Voice</option>';
+
+                    voices.forEach((voice, index) => {
+                        // Prefer English voices
+                        const isEnglish = voice.lang.includes('en');
+                        const option = document.createElement('option');
+                        option.value = index;
+                        option.textContent = `${voice.name} (${voice.lang})${voice.default ? ' — DEFAULT' : ''}`;
+
+                        // Put English voices at the top
+                        if (isEnglish) {
+                            voiceSelect.insertBefore(option, voiceSelect.firstChild.nextSibling);
+                        } else {
+                            voiceSelect.appendChild(option);
+                        }
+                    });
+                }
+
+                // Chrome loads voices asynchronously
+                if (speechSynthesis.onvoiceschanged !== undefined) {
+                    speechSynthesis.onvoiceschanged = populateVoiceList;
+                }
+
+                populateVoiceList();
+            }
+
+            // Update speech settings display
+            rateSlider.addEventListener('input', function() {
+                rateValue.textContent = parseFloat(this.value).toFixed(1);
+            });
+
+            pitchSlider.addEventListener('input', function() {
+                pitchValue.textContent = parseFloat(this.value).toFixed(1);
+            });
+
+            // Play/Pause button
+            playPauseBtn.addEventListener('click', function() {
+                if (isPlaying) {
+                    pauseSpeech();
+                } else {
+                    playSpeech();
+                }
+            });
+
+            // Click on progress bar to seek
+            audioProgress.addEventListener('click', function(e) {
+                if (!isPlaying || !utterance) return;
+
+                const percent = e.offsetX / this.offsetWidth;
+                const newPosition = percent * totalDuration;
+
+                // Cancel current speech and start a new one from the desired position
+                pauseSpeech();
+
+                // Create a new utterance with the text starting from approximately the desired position
+                const script = sectionScripts[currentSection - 1];
+                const words = script.split(' ');
+                const wordPosition = Math.floor(words.length * percent);
+                const remainingText = words.slice(wordPosition).join(' ');
+
+                playSpeechFromText(remainingText);
+
+                // Update progress bar
+                audioProgressBar.style.width = `${percent * 100}%`;
+            });
+
+            function playSpeech() {
+                if (!window.speechSynthesis) return;
+
+                // Get the script for the current section
+                const script = sectionScripts[currentSection - 1];
+                if (!script) {
+                    alert("No script available for this section.");
+                    return;
+                }
+
+                playSpeechFromText(script);
+            }
+
+            function playSpeechFromText(text) {
+                // Create a new utterance
+                utterance = new SpeechSynthesisUtterance(text);
+
+                // Set voice if selected
+                const voices = speechSynthesis.getVoices();
+                const selectedVoice = voiceSelect.value;
+                if (selectedVoice !== "") {
+                    utterance.voice = voices[parseInt(selectedVoice)];
+                }
+
+                // Set rate and pitch
+                utterance.rate = parseFloat(rateSlider.value);
+                utterance.pitch = parseFloat(pitchSlider.value);
+
+                // Set up event handlers
+                utterance.onstart = function(event) {
+                    isPlaying = true;
+                    playPauseIcon.className = 'fas fa-pause';
+                    startTime = Date.now();
+
+                    // Estimate total duration based on text length and speech rate
+                    // This is an approximation as actual duration depends on many factors
+                    const wordsPerMinute = 150 * utterance.rate; // Average reading speed adjusted by rate
+                    const wordCount = text.split(' ').length;
+                    totalDuration = (wordCount / wordsPerMinute) * 60 * 1000; // Duration in milliseconds
+
+                    // Start visualization
+                    startVisualization();
+
+                    // Start progress update
+                    updateProgress();
+                };
+
+                utterance.onend = function(event) {
+                    isPlaying = false;
+                    playPauseIcon.className = 'fas fa-play';
+                    stopVisualization();
+
+                    // Reset progress
+                    audioProgressBar.style.width = '100%';
+
+                    // Format time display
+                    const minutes = Math.floor(totalDuration / 60000);
+                    const seconds = Math.floor((totalDuration % 60000) / 1000);
+                    audioTime.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds} / ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                };
+
+                utterance.onerror = function(event) {
+                    console.error('SpeechSynthesis error:', event);
+                    isPlaying = false;
+                    playPauseIcon.className = 'fas fa-play';
+                    stopVisualization();
+                };
+
+                // Start speaking
+                speechSynthesis.speak(utterance);
+            }
+
+            function pauseSpeech() {
+                if (window.speechSynthesis) {
+                    speechSynthesis.cancel();
+                    isPlaying = false;
+                    playPauseIcon.className = 'fas fa-play';
+                    stopVisualization();
+                }
+            }
+
+            function updateProgress() {
+                if (!isPlaying) return;
+
+                const elapsedTime = Date.now() - startTime;
+                const progressPercent = Math.min((elapsedTime / totalDuration) * 100, 100);
+
+                // Update progress bar
+                audioProgressBar.style.width = `${progressPercent}%`;
+
+                // Update time display
+                const elapsedMinutes = Math.floor(elapsedTime / 60000);
+                const elapsedSeconds = Math.floor((elapsedTime % 60000) / 1000);
+                const totalMinutes = Math.floor(totalDuration / 60000);
+                const totalSeconds = Math.floor((totalDuration % 60000) / 1000);
+
+                audioTime.textContent = `${elapsedMinutes}:${elapsedSeconds < 10 ? '0' : ''}${elapsedSeconds} / ${totalMinutes}:${totalSeconds < 10 ? '0' : ''}${totalSeconds}`;
+
+                // Highlight current question based on progress
+                highlightCurrentQuestion(progressPercent / 100);
+
+                // Continue updating
+                requestAnimationFrame(updateProgress);
+            }
+
+            // Audio visualization
+            function startVisualization() {
+                const bars = document.querySelectorAll('#visualization-current .bar');
+
+                function updateBars() {
+                    if (!isPlaying) return;
+
+                    // Generate random heights for bars to simulate audio visualization
+                    for (let i = 0; i < bars.length; i++) {
+                        // More active visualization during speech
+                        const height = Math.random() * 100;
+                        bars[i].style.height = `${height}%`;
+
+                        // Change color based on height
+                        const hue = 240 - (height / 100) * 180; // Blue to red
+                        bars[i].style.backgroundColor = `hsl(${hue}, 80%, 60%)`;
+                    }
+
+                    animationFrameId = requestAnimationFrame(updateBars);
+                }
+
+                updateBars();
+            }
+
+            function stopVisualization() {
+                if (animationFrameId) {
+                    cancelAnimationFrame(animationFrameId);
+                    animationFrameId = null;
+                }
+
+                // Reset all bars
+                const bars = document.querySelectorAll('#visualization-current .bar');
+                for (let i = 0; i < bars.length; i++) {
+                    bars[i].style.height = '0px';
+                    bars[i].style.backgroundColor = '#3498db';
+                }
+            }
+
+            // Question highlighting based on audio progress
+            function highlightCurrentQuestion(progress) {
+                // This is a simplified approach - in a real implementation, you would have timestamps for each question
+                // For this demo, we'll divide the questions evenly across the audio duration
+
+                const currentSection = document.querySelector(`.section-content.active`);
+                const questions = currentSection.querySelectorAll('.question-item');
+
+                if (questions.length === 0) return;
+
+                // Calculate which question should be active based on progress
+                const currentQuestionIndex = Math.min(
+                    Math.floor(progress * questions.length),
+                    questions.length - 1
+                );
+
+                // Remove active class from all questions
+                questions.forEach(q => q.classList.remove('active'));
+
+                // Add active class to current question
+                questions[currentQuestionIndex].classList.add('active');
+
+                // Scroll to the question if it's not visible
+                const activeQuestion = questions[currentQuestionIndex];
+                const containerRect = document.getElementById('testContainer').getBoundingClientRect();
+                const questionRect = activeQuestion.getBoundingClientRect();
+
+                if (questionRect.top < containerRect.top || questionRect.bottom > containerRect.bottom) {
+                    activeQuestion.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+
+            // Track answered questions
+            const questionInputs = document.querySelectorAll('.question-input');
+
+            questionInputs.forEach(input => {
+                input.addEventListener('change', function() {
+                    const sectionNumber = this.getAttribute('data-section');
+                    const section = document.getElementById(`section-${sectionNumber}`);
+
+                    // Count answered questions in this section
+                    const inputs = section.querySelectorAll('.question-input');
+                    let answeredCount = 0;
+
+                    inputs.forEach(inp => {
+                        if (inp.type === 'radio') {
+                            // For radio buttons, check if any in the group is checked
+                            const name = inp.getAttribute('name');
+                            const checked = section.querySelector(`input[name="${name}"]:checked`);
+                            if (checked && !inp.counted) {
+                                answeredCount++;
+                                inp.counted = true;
+                            }
+                        } else if (inp.value.trim() !== '') {
+                            answeredCount++;
+                        }
+                    });
+
+                    // Update the counter
+                    const counter = section.querySelector('.question-counter .current');
+                    counter.textContent = answeredCount;
+                });
+            });
+
+            // Form submission - show loading overlay
+            const form = document.getElementById('listeningForm');
+            const loadingOverlay = document.getElementById('loading-overlay');
+
+            if (form && loadingOverlay) {
+                form.addEventListener('submit', function() {
+                    loadingOverlay.style.display = 'flex';
+                });
+            }
+
+            // Hide header, footer, and sidebar for test mode
+            document.addEventListener('DOMContentLoaded', function() {
+                // Check if we're in a test page
+                if (window.location.pathname.includes('test')) {
+                    // Hide header
+                    const header = document.querySelector('header');
+                    if (header) header.style.display = 'none';
+
+                    // Hide footer
+                    const footer = document.querySelector('footer');
+                    if (footer) footer.style.display = 'none';
+
+                    // Hide sidebar
+                    const sidebar = document.querySelector('.sidebar');
+                    if (sidebar) sidebar.style.display = 'none';
+
+                    // Make main content full width
+                    const mainContent = document.querySelector('.main-content');
+                    if (mainContent) mainContent.style.width = '100%';
+                }
+            });
+        });
+    </script>
+{% endblock %}
